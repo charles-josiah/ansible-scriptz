@@ -18,13 +18,9 @@
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
       ping: 
 
-    - name: hostname 
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-      debug: msg="Eu sou, {{ ansible_hostname }}"
-
 #    - debug: var=ansible_date_time
 
-    - name: Que horas sao? 
+    - name: Quem sou eu
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-      debug: msg="dia {{ ansible_date_time.date }}, hora {{ ansible_date_time.time }}, timezone  {{ ansible_date_time.tz }} "
+      debug: msg="Eu sou, {{ ansible_hostname }}, hoje, {{ ansible_date_time.date }}, hora {{ ansible_date_time.time }}, timezone  {{ ansible_date_time.tz }} "
 
