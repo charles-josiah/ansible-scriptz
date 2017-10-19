@@ -1,0 +1,30 @@
+---
+
+- hosts: '{{ host }}'
+#srvantispam02 
+
+  user: charles.a
+  connection: ssh
+  become_user: root
+  become: true
+  become_method: sudo
+  gather_facts: yes
+
+  vars:
+      ansible_sudo_flags: '-H'
+
+  tasks:
+    - name: testando o ping 
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+      ping: 
+
+    - name: hostname 
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+      debug: msg="Eu sou, {{ ansible_hostname }}"
+
+#    - debug: var=ansible_date_time
+
+    - name: Que horas sao? 
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+      debug: msg="dia {{ ansible_date_time.date }}, hora {{ ansible_date_time.time }}, timezone  {{ ansible_date_time.tz }} "
+
