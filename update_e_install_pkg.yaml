@@ -1,7 +1,6 @@
 ---
 
 - hosts: '{{ host }}'
-#srvantispam02 
 
   user: charles.a
   connection: ssh
