@@ -1,0 +1,124 @@
+---
+
+- hosts: '{{ host }}'
+#srvantispam02 
+
+  user: charles.a
+  connection: ssh
+  become_user: root
+  become: true
+  become_method: sudo
+  gather_facts: true 
+
+  vars:
+    proxy_env:
+#      http_proxy: http://10.5.50.198:3128
+      ansible_sudo_flags: '-H'
+
+#  environment:
+#      http_proxy: http://10.5.50.198:3128
+
+
+
+
+  pre_tasks:
+
+
+
+  - name: Bootstrap with python
+    raw: which python || (sudo apt update; sudo apt install -y python; sudo yum install -y python)
+    ignore_errors: yes
+
+  - name: Install python-simplejson on REL 5
+    raw: cat /etc/redhat-release | grep "release 5" && sudo yum -y install python-simplejson
+    ignore_errors: yes
+
+  - name: Installs python-simplejson in RAW mode
+    raw: apt-get -y install python-simplejson
+    ignore_errors: yes
+
+  - name: Instalando EPEL
+    raw:  sudo yum install -y epel-release
+    ignore_errors: yes 
+
+  - name: Instalando Ansible # Modo nao bonito
+    raw: sudo yum install -y ansible
+    ignore_errors: yes
+
+  - name: Gathering Facts
+    setup: 
+
+  tasks:
+
+  - name: Instalando atualizacoes SO - Centos 
+    yum: name=* state=latest update_cache=yes
+    when: ansible_distribution == "CentOS"
+    tags: atualizar
+
+  - name: Instalando atualizacoes SO - Debian
+    apt: upgrade=dist update_cache=yes
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' 
+    tags: atualizar
+
+  - name: EPEL
+    yum: name=epel-release
+    when: ansible_os_family == "RedHat" and ansible_distribution != "Fedora"
+    tags: instalar
+
+  - name: Yum install Ansible RH 7
+    yum: name=ansible,python-pip,python-jinja2,sshpass,openssh-clients,wget update_cache=yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7 and ansible_distribution != "Fedora"
+    tags: instalar
+
+  
+  - name: Yum install requirements RH5
+    yum: name=python26,python26-simplejson,python26-distribute,gcc,python26-devel,openssh-clients,sshpass,libffi-devel,openssl-devel
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int < 6
+    ignore_errors: yes
+    tags: instalar
+
+  - name: Ubuntu install requirements
+    apt: name=software-properties-common
+    when: ansible_distribution == "Ubuntu"
+    tags: instalar
+    
+  - name: Ubuntu install Ansible PPA repo  
+    apt_repository: repo='ppa:ansible/ansible'
+    when: ansible_distribution == "Ubuntu"
+    tags: instalar
+      
+  - name: Ubuntu install Ansible with apt
+    apt: name=ansible,python-pip,python-jinja2,sshpass,openssh-client,unzip
+    when: ansible_distribution == "Ubuntu"
+    tags: instalar
+
+  - name: Instalando pacotes do Centos
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    with_items:
+     - libselinux-python
+     - net-tools
+     - vim-common
+     - mlocate
+     - ntp
+    tags: instalar
+
+  - name: Instalando pacotes do Debian
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    with_items:
+     - sharutils
+     - vim
+     - ntpdate
+    tags: instalar
+
+  - name: Instalado Pacotes 
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    with_items:
+     - sudo
+     - wget
+     - rcs 
+     - curl
+     - sysstat
+     - wget
+    tags: instalar
