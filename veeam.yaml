@@ -7,6 +7,8 @@
   become_user: root
   become: true
   become_method: sudo
+  connection: paramiko
+
 
   vars:
     ansible_sudo_flags: '-H'
