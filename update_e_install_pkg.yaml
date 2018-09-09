@@ -1,26 +1,32 @@
 ---
 
-- hosts: '{{ host }}'
-
-  user: charles.a
+- hosts: all 
+  #'{{ host }}'
+  user: root
   connection: ssh
   become_user: root
   become: true
-  become_method: sudo
+  #become_method: su
+  #become_method: sudo
   gather_facts: true 
+  connection: paramiko
 
   vars:
-    proxy_env:
-#      http_proxy: http://10.5.50.198:3128
-      ansible_sudo_flags: '-H'
 
-#  environment:
-#      http_proxy: http://10.5.50.198:3128
+  #proxy_env:
+  #  http_proxy: http://10.5.50.198:3128
+  
+  #ansible_sudo_flags: '-H'
+
+  #environment:
+  #  http_proxy: http://10.5.50.198:3128
 
 
   pre_tasks:
 
-
+  - name: 'install python2'
+    raw: sudo apt-get -y install python-simplejson
+    ignore_errors: yes
 
   - name: Bootstrap with python
     raw: which python || (sudo apt update; sudo apt install -y python; sudo yum install -y python)
@@ -96,8 +102,9 @@
      - libselinux-python
      - net-tools
      - vim-common
-     - mlocate
      - ntp
+     - openssl-devel
+     - perl-IO-Socket-SSL
     tags: instalar
 
   - name: Instalando pacotes do Debian
@@ -107,15 +114,18 @@
      - sharutils
      - vim
      - ntpdate
+     - net-tools
     tags: instalar
 
   - name: Instalado Pacotes 
     action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
     with_items:
+     - mlocate 
      - sudo
      - wget
      - rcs 
      - curl
      - sysstat
      - wget
+     - open-vm-tools
     tags: instalar

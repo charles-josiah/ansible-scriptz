@@ -1,6 +1,6 @@
 ---
 
-- hosts: '{{ host }}' 
+- hosts: all 
   user: charles.a 
 
   connection: ssh
@@ -12,6 +12,13 @@
 
   vars:
     ansible_sudo_flags: '-H'
+    mtmon_config: /usr/local/Multitask/mtadm/etc/mtadm.conf
+    #transkey: d78C8gGG  
+    #transkey: Ne4vO8pw
+    transkey: EFbVeAiC 
+    nome_cliente: higex
+    mtmon_server: '177.19.228.142, 189.72.110.218, 200.175.53.1'
+    site_bkp: '170.84.17.136'
 
   tasks:
 
@@ -28,6 +35,7 @@
      - perl-Crypt-SSLeay.x86_64 
      - perl-CGI
      - sharutils
+     - perl-JSON
      - openssl-devel
     tags: instalar
 
@@ -69,16 +77,18 @@
   - name: Instala pacotes MTMON 
     cpanm: name={{ item }}
     with_items:
+        - JSON
         - CGI 
         - Net::Ping 
         - Rcs 
-        - Email::Sender 
+        - Email::Sender
+        - Mail::Sender  
         - MIME::Base64 
         - Net::Telnet 
         - Net::Telnet::Cisco 
         - Text::ParseWords 
         - Template
-        - IO::Socket::INET6   
+#        - IO::Socket::INET6   
         - IO::Socket::IP 
         - IO::Socket::SSL 
         - Time::HiRes
@@ -104,10 +114,14 @@
     get_url: url=http://200.175.53.1/install/inst_mtadm
            dest=/tmp/inst_mtadm
 
+
   - name: Baixando pacotes MTMON - inst_mtmon_client
     get_url: url=http://200.175.53.1/install/inst_mtmon_client 
            dest=/tmp/inst_mtmon_client 
 
+  - name: Baixando pacotes MTMON - inst_mtmon_send 
+    get_url: url=http://200.175.53.1/install/inst_mtsend 
+           dest=/tmp/inst_mtsend 
 
   - name: executa mtmon - inst_mtadm 
     shell: sh /tmp/inst_mtadm
@@ -115,6 +129,10 @@
   - name: executa mtmon - inst_mtmon_client 
     shell: sh /tmp/inst_mtmon_client
  
+  - name: executa mtmon - inst_mtsend 
+    shell: sh /tmp/inst_mtsend
+ 
+
   - name: "Remove CRON antes de comecar"
     cron:
        name=MTMON 
@@ -169,12 +187,31 @@
     tags: instalar_cron
 
 
+  - name: Modifca algumas linhas do ssh
+    lineinfile:
+      dest="{{ mtmon_config }}"
+      regexp="{{ item.regexp }}"
+      line="{{ item.line }}"
+      backup=yes
+    with_items:
+        - { regexp: '(?i)Origem', line: '    Origem={{ nome_cliente }}' }
+        - { regexp: '(?i)transkey', line: '    TransKEY={{ transkey }} '} 
+        - { regexp: '(?i)ServerMTMON', line: '    ServerMTMON={{ mtmon_server }} '} 
+        - { regexp: '(?i)sitebkp', line: '    SiteBKP={{ site_bkp }} '} 
+    tags: configura_mtmon
+
   - name: Atualizando tudo CPZIP 
     command: /usr/local/bin/cpzip.pl
+    tags: atualizar
+
+  - name: Force Update 
+    command: /usr/local/Multitask/mtmon/bin/forcaUpload.pl 
     tags: atualizar
 
   - name: Executando Incluir Arquivos
     command:  /usr/local/Multitask/mtadm/bin/IncluiArquivos.pl -a
     tags: instalar_fim
 
-
+  - name: Verifica se tudo funciona 
+    command: /usr/local/Multitask/mtmon/bin/mtmon_evento.pl --aplicacao=teste --mensagem="Teste de conexao $(hostname)" --debug --eventual --severidade=0
+    tags: instalar_fim
