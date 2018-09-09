@@ -1,0 +1,25 @@
+---
+- hosts: all 
+  user: charles.a
+  #become: true
+  #become_user: root
+  
+  vars: 
+     chave_dir_ori: /Users/charles.a/Acessos/Ansible/chaves
+     chave_arq_ori: charles.a.pub
+     chave_dir_dst:  ~/.ssh
+     chave_arq_dst: authorized_keys
+
+
+  tasks:
+  - name: Criar diretorio 
+    file:
+      path="{{ chave_dir_dst }}"
+      state=directory
+      mode=700
+
+  - name: Criar arquivo das chaves 
+    copy:  
+       src='{{ chave_dir_ori }}/{{ chave_arq_ori }}'
+       dest='{{ chave_dir_dst }}/{{ chave_arq_dst }}' 
+       mode=600
