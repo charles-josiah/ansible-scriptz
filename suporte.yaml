@@ -7,14 +7,13 @@
   become_method: sudo
   connection: paramiko
   gather_facts: true 
-#False
 
   vars:
     novos_usuarios:
       - charles.a
- #     - wagner.f
- #     - gustavo.h
- #     - geraldo.m
+      - wagner.f
+      - gustavo.h
+      - geraldo.m
     remove_usuarios:
       - yuri
       - luiz.carlos
@@ -26,9 +25,9 @@
       - davi 
     ssh_chaves:
       - charles.a
-  #    - wagner.f
-  #    - gustavo.h
-  #    - geraldo.m
+      - wagner.f
+      - gustavo.h
+      - geraldo.m
 
     sshd_config: /etc/ssh/sshd_config
     chave_dir_ori: /Users/charles.a/Acessos/Ansible/chaves
@@ -36,8 +35,6 @@
     ansible_sudo_flags: '-H'
 
     pwd_alias: "{{ lookup('password', '/dev/null length=17 chars=ascii_letters') }}"
-
-
 
   tasks:
 
