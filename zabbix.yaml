@@ -1,0 +1,96 @@
+---
+
+- hosts: all 
+
+  user: charles.a
+  connection: ssh
+  become_user: root
+  become: true
+  become_method: sudo
+
+  vars:
+     zabbix_server: "172.16.10.1"
+     conf_zabbix: "./files/zabbix_agentd.conf"
+     dest_conf_zabbix: "/etc/zabbix/zabbix_agentd.conf"
+     add_host_zabbix: "python ./files/zabbix-api-host-create-master/main.py "
+
+     zabbix_host_group_id: "casembrapa"
+     zabbix_username: "admin"
+     zabbix_password: "$$Intel12.$$"
+     zabbix_templeate_id: "Linux"
+     zabbix_url: "mtjoca.multitask.com.br"
+     zabbix_http_auth_username: ""
+     zabbix_http_auth_password: ""
+
+ 
+  tasks:
+
+
+#CentOS/RHEL 7:
+# rpm -Uvh http://repo.zabbix.com/zabbix/3.0/rhel/7/x86_64/zabbix-release-3.0-1.el7.noarch.rpm
+
+#CentOS/RHEL 6:
+# rpm -Uvh http://repo.zabbix.com/zabbix/3.0/rhel/6/x86_64/zabbix-release-3.0-1.el6.noarch.rpm
+
+#CentOS/RHEL 5:
+# rpm -Uvh http://repo.zabbix.com/zabbix/3.0/rhel/5/x86_64/zabbix-release-3.0-1.el5.noarch.rpm
+
+
+
+
+
+  - name: Instalando pacotes do Centos 
+    when: ansible_distribution == "CentOS" or ansible_distribution == 'RedHat'
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    with_items:
+     - zabbix-agent 
+    tags: instalar
+
+  - name: Instalando  pacotes para o Debian 
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' 
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    with_items:
+     - zabbix-agent 
+    tags: instalar
+
+  - file: path=/etc/zabbix/zabbix_agent.conf  state=absent
+    tags: configurar
+
+  - name: Criar diretorio log
+    file: path=/var/log/zabbix-agent  state=directory owner=zabbix group=zabbix mode=0775
+    tags: configurar
+
+  - name: Copiando a configuracao 
+    copy: src={{ conf_zabbix }} dest={{ dest_conf_zabbix }} seuser=system_u
+    tags: configurar
+
+  - name: Configurar o Zabbix Agent 
+    lineinfile: dest={{ dest_conf_zabbix }} regexp="^Server=.*" insertafter="^# Server=" line=Server={{ zabbix_server }}
+    tags: configurar
+
+  - name: Configurar o Zabbix Agent 
+    lineinfile: dest={{ dest_conf_zabbix }} regexp="^ServerActive=.*" insertafter="^# ServeActiver=" line=ServerActive={{ zabbix_server }}
+    tags: configurar
+
+  - name: Configurar o Zabbix Agent 
+    lineinfile: dest={{ dest_conf_zabbix }} regexp="^Hostname=.*" insertafter="^# Hostname=" line=Hostname={{ ansible_hostname }}
+    tags: configurar
+
+  - name: Reiniciar Zabbix
+    service:
+      name: zabbix-agent 
+      state: restarted
+    notify:
+      restart zabbix-agent
+    tags: reiniciar
+
+#  - name: zabbix server create host
+#    connection: local
+#    shell: python ./files/zabbix-api-host-create-master/main.py {{ ansible_hostname }} {{ ansible_eth0.ipv4.address }} {{ zabbix_host_group_id }} {{ zabbix_username }} {{ zabbix_password }} {{ zabbix_http_auth_username }} {{ zabbix_http_auth_password }} {{ zabbix_templeate_id }} {{ zabbix_url }}
+#    register: command_result
+#    failed_when: "'error' in command_result.stderr"
+#    tags: add_host
+
+  handlers:
+  - name: restart zabbix-agent
+    service: name=zabbix-agent state=started enabled=yes
