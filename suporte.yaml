@@ -1,35 +1,31 @@
 ---
-- hosts: centos 
-  user: charles.a 
+- hosts: lab4 
+  user: root 
   connection: ssh
   become_user: root
   become: yes
-  become_method: sudo
+  become_method: su
   connection: paramiko
   gather_facts: true 
 
   vars:
     novos_usuarios:
       - charles.a
+      - wagner.f
       - gustavo.h
       - geraldo.m
-
     remove_usuarios:
       - yuri
       - luiz.carlos
       - davi
-      - wagner.fernandes
-      - wagner.f
-
+      - wagner.fernanades
     remove_user_sudo:
       - yuri
       - luiz.carlos 
       - davi 
-      - wagner.fernandes
-      - wagner.f
-
     ssh_chaves:
       - charles.a
+      - wagner.f
       - gustavo.h
       - geraldo.m
 
@@ -103,6 +99,8 @@
       state=absent
     with_items: "{{ remove_user_sudo }}"
     tags: remove_sudores
+
+
 
   - name: Diretorio Chaves
     action: file path={{ chave_dir_dst }} state=directory
