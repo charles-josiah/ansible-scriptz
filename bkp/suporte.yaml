@@ -1,75 +1,46 @@
 ---
-<<<<<<< HEAD
-
-- hosts: docker-novo
-  user: charles.a 
-=======
-- hosts: centos 
-  user: charles.a
->>>>>>> 20181011-Updates
+- hosts: lab4 
+  user: root 
   connection: ssh
   become_user: root
   become: yes
-  become_method: sudo
+  become_method: su
   connection: paramiko
+  gather_facts: true 
 
   vars:
     novos_usuarios:
       - charles.a
-<<<<<<< HEAD
-      - infrainside 
-
-    remove_usuarios:
       - wagner.f
       - gustavo.h
       - geraldo.m
-=======
-      - gustavo.h
-      - geraldo.m
-
     remove_usuarios:
->>>>>>> 20181011-Updates
       - yuri
       - luiz.carlos
       - davi
       - wagner.fernanades
-<<<<<<< HEAD
-=======
-      - wagner.f
->>>>>>> 20181011-Updates
-
     remove_user_sudo:
-      - wagner.f
-      - gustavo.h
-      - geraldo.m
-      - yuri
-      - luiz.carlos
-      - davi
-      - wagner.fernanades
       - yuri
       - luiz.carlos 
-<<<<<<< HEAD
       - davi 
-
     ssh_chaves:
       - charles.a
-=======
-      - davi
-      - wagner.fernandes
       - wagner.f
- 
-    ssh_chaves:
-      - charles.a
       - gustavo.h
       - geraldo.m
->>>>>>> 20181011-Updates
 
     sshd_config: /etc/ssh/sshd_config
     chave_dir_ori: /Users/charles.a/Acessos/Ansible/chaves
     chave_dir_dst: /etc/ssh/chaves 
     ansible_sudo_flags: '-H'
 
+    pwd_alias: "{{ lookup('password', '/dev/null length=17 chars=ascii_letters') }}"
+
   tasks:
+
+  - set_fact:
+        my_pass: "{{ pwd_alias }}"
+
   - name: Desliga SELinux
     selinux:  state=disabled
     when: ansible_distribution == "CentOS"
@@ -78,9 +49,9 @@
     user: 
      name={{ item }}
      state=present
-     password="{{ '$.SGM@2017'|password_hash('sha512') }}"
+     password= "{{ "{{pwd_alias}}" | password_hash('sha512') }}"
      shell=/bin/bash
-     update_password=always 
+     update_password=on_create
     with_items: "{{ novos_usuarios }}"
     tags: adiciona_usuario_padrao 
 
@@ -129,6 +100,8 @@
     with_items: "{{ remove_user_sudo }}"
     tags: remove_sudores
 
+
+
   - name: Diretorio Chaves
     action: file path={{ chave_dir_dst }} state=directory
       owner=0 group=0 mode=0755
@@ -143,7 +116,7 @@
 
   - name: Modifca algumas linhas do ssh 
     lineinfile:
-      dest="{{ sshd_config }}" 
+      dest="{{ sshd_config }}"
       regexp="{{ item.regexp }}"
       line="{{ item.line }}"
     with_items:
@@ -167,8 +140,6 @@
         - DenyUsers
     tags: configura_ssh
 
-
-
   - name: Permite grupo whell acesso ao sistema 
     lineinfile:
       dest="{{ sshd_config }}"  
@@ -181,6 +152,16 @@
        - restart ssh
        - restart sshd
     tags: configura_ssh
+
+  - name: Atualiza senhas
+    user: 
+      name={{ item }}
+      state=present
+      password="{{ "{{pwd_alias}}" | password_hash('sha1024') }}"
+      shell=/bin/bash
+      update_password=always
+    with_items: "{{ novos_usuarios }}"
+    tags: atualiza_senha 
 
 
   handlers:

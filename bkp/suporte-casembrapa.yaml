@@ -1,12 +1,7 @@
 ---
-<<<<<<< HEAD
 
 - hosts: docker-novo
   user: charles.a 
-=======
-- hosts: centos 
-  user: charles.a
->>>>>>> 20181011-Updates
   connection: ssh
   become_user: root
   become: yes
@@ -16,27 +11,16 @@
   vars:
     novos_usuarios:
       - charles.a
-<<<<<<< HEAD
       - infrainside 
 
     remove_usuarios:
       - wagner.f
       - gustavo.h
       - geraldo.m
-=======
-      - gustavo.h
-      - geraldo.m
-
-    remove_usuarios:
->>>>>>> 20181011-Updates
       - yuri
       - luiz.carlos
       - davi
       - wagner.fernanades
-<<<<<<< HEAD
-=======
-      - wagner.f
->>>>>>> 20181011-Updates
 
     remove_user_sudo:
       - wagner.f
@@ -48,21 +32,10 @@
       - wagner.fernanades
       - yuri
       - luiz.carlos 
-<<<<<<< HEAD
       - davi 
 
     ssh_chaves:
       - charles.a
-=======
-      - davi
-      - wagner.fernandes
-      - wagner.f
- 
-    ssh_chaves:
-      - charles.a
-      - gustavo.h
-      - geraldo.m
->>>>>>> 20181011-Updates
 
     sshd_config: /etc/ssh/sshd_config
     chave_dir_ori: /Users/charles.a/Acessos/Ansible/chaves
