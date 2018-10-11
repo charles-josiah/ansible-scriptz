@@ -15,8 +15,8 @@
     mtmon_config: /usr/local/Multitask/mtadm/etc/mtadm.conf
     #transkey: d78C8gGG  
     #transkey: Ne4vO8pw
-    transkey: EFbVeAiC 
-    nome_cliente: higex
+    #transkey: EFbVeAiC 
+    #nome_cliente: higex
     mtmon_server: '177.19.228.142, 189.72.110.218, 200.175.53.1'
     site_bkp: '170.84.17.136'
 
