@@ -4,7 +4,7 @@
   connection: ssh
   become_user: root
   become: yes
-  become_method: sudou
+  become_method: sudo
   connection: paramiko
   gather_facts: true 
 
