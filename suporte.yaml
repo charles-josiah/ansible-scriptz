@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: centos 
   user: charles.a 
   connection: ssh
   become_user: root
@@ -11,8 +11,8 @@
   vars:
     novos_usuarios:
       - charles.a
-      - wagner.f
       - gustavo.h
+      - geraldo.m
 
     remove_usuarios:
       - yuri
@@ -30,7 +30,6 @@
 
     ssh_chaves:
       - charles.a
-      - wagner.f
       - gustavo.h
       - geraldo.m
 
