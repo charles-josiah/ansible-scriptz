@@ -1,0 +1,217 @@
+---
+
+- hosts: all 
+  user: charles.a 
+
+  connection: ssh
+  become_user: root
+  become: true
+  become_method: sudo
+  connection: paramiko
+
+
+  vars:
+    ansible_sudo_flags: '-H'
+    mtmon_config: /usr/local/Multitask/mtadm/etc/mtadm.conf
+    #transkey: d78C8gGG  
+    #transkey: Ne4vO8pw
+    #transkey: EFbVeAiC 
+    #nome_cliente: higex
+    mtmon_server: '177.19.228.142, 189.72.110.218, 200.175.53.1'
+    site_bkp: '170.84.17.136'
+
+  tasks:
+
+  - name: Instalando pacotes do Centos 
+    when: ansible_distribution == "CentOS" or ansible_distribution == 'RedHat'
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
+    with_items:
+     - python-simplejson
+     - libselinux-python 
+     - perl-CPAN
+     - perl-Crypt-SSLeay 
+     - "@Development tools"     
+     - perl-Crypt-SSLeay.x86_64 
+     - perl-CGI
+     - sharutils
+     - perl-JSON
+     - openssl-devel
+    tags: instalar
+
+  - name: Instalando  pacotes para o Debian 
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' 
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    with_items:
+     - liblwp-protocol-https-perl 
+     - sysstat 
+     - sharutils
+     - build-essential
+    tags: instalar
+
+  - name: Download do modulo do ansible para PERL
+    get_url: url=http://cpanmin.us/
+           dest=/tmp/cpanm.pl
+    tags: instalar
+
+  - name: Instalado o Modulo do ansible para PERL 
+    command: perl cpanm.pl App::cpanminus
+    args:
+       chdir: /tmp/
+       creates: /usr/local/bin/cpanm
+    tags: instalar
+
+  - name: Ajustando link simbolicos 
+    file: src=/usr/local/bin/cpanm
+          dest=/usr/bin/cpanm
+          state=link
+    ignore_errors: yes
+    tags: instalar
+
+  - name: Ajusta configuracao interativa do PERL 
+    shell: perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->commit'
+    register: install_cpanm
+    changed_when: "'is up to date' not in install_cpanm.stdout"
+    tags: instalar 
+
+  - name: Instala pacotes MTMON 
+    cpanm: name={{ item }}
+    with_items:
+        - JSON
+        - CGI 
+        - Net::Ping 
+        - Rcs 
+        - Email::Sender
+        - Mail::Sender  
+        - MIME::Base64 
+        - Net::Telnet 
+        - Net::Telnet::Cisco 
+        - Text::ParseWords 
+        - Template
+#        - IO::Socket::INET6   
+        - IO::Socket::IP 
+        - IO::Socket::SSL 
+        - Time::HiRes
+        - Net::HTTP
+        - LWP::UserAgent
+    tags: instalar
+
+  - name: Instalado Pacotes Gerais para o SO 
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    with_items:
+     - vim
+     - sudo
+     - wget
+     - ntpdate
+     - rcs 
+     - curl
+     - sysstat
+     - wget
+    tags: instalar
+    ignore_errors: yes
+
+  - name: Baixando pacotes MTMON - inst_mtadm
+    get_url: url=http://200.175.53.1/install/inst_mtadm
+           dest=/tmp/inst_mtadm
+
+
+  - name: Baixando pacotes MTMON - inst_mtmon_client
+    get_url: url=http://200.175.53.1/install/inst_mtmon_client 
+           dest=/tmp/inst_mtmon_client 
+
+  - name: Baixando pacotes MTMON - inst_mtmon_send 
+    get_url: url=http://200.175.53.1/install/inst_mtsend 
+           dest=/tmp/inst_mtsend 
+
+  - name: executa mtmon - inst_mtadm 
+    shell: sh /tmp/inst_mtadm
+
+  - name: executa mtmon - inst_mtmon_client 
+    shell: sh /tmp/inst_mtmon_client
+ 
+  - name: executa mtmon - inst_mtsend 
+    shell: sh /tmp/inst_mtsend
+ 
+
+  - name: "Remove CRON antes de comecar"
+    cron:
+       name=MTMON 
+       cron_file=MTMON 
+       state=absent
+    tags: instalar_cron
+
+  - name: Configura o CRON do MTMON
+    cron: 
+       name="MTMON-MonitoraAmbiente"
+       cron_file="MTMON"
+       user=root
+       minute=59
+       job="/usr/local/Multitask/mtadm/bin/MonitoraAmbiente.sh"
+    tags: instalar_cron
+
+  - name: Configura o CRON do MTMON
+    cron: 
+       name="MTMON-mtwdog"
+       cron_file="MTMON"
+       user=root
+       minute=30 
+       hour=6,12,18
+       job="/usr/local/Multitask/mtadm/bin/mtwdog_files.pl --sincronizar"
+    tags: instalar_cron
+
+  - name: Configura o CRON do MTMON
+    cron: 
+       name="MTMON-Cron"
+       cron_file="MTMON"
+       user=root
+       minute=0,15,30,45 
+       job="/usr/local/Multitask/mtmon/bin/mtmon_cron.pl"
+    tags: instalar_cron
+
+  - name: Configura o CRON do MTMON
+    cron: 
+       name="MTMON-ColetaMemoria"
+       cron_file="MTMON"
+       user=root
+       minute=0,15,30,45 
+       job="/usr/local/Multitask/mtadm/bin/ColetaMemoriaReal.sh"
+    tags: instalar_cron
+
+  - name: Configura o CRON do MTMON
+    cron: 
+       name="MTMON-CronnoReset"
+       cron_file="MTMON"
+       user=root
+       special_time=reboot  
+       job="/usr/local/Multitask/mtmon/bin/mtmon_cron.pl"
+    tags: instalar_cron
+
+
+  - name: Modifca algumas linhas do ssh
+    lineinfile:
+      dest="{{ mtmon_config }}"
+      regexp="{{ item.regexp }}"
+      line="{{ item.line }}"
+      backup=yes
+    with_items:
+        - { regexp: '(?i)Origem', line: '    Origem={{ nome_cliente }}' }
+        - { regexp: '(?i)transkey', line: '    TransKEY={{ transkey }} '} 
+        - { regexp: '(?i)ServerMTMON', line: '    ServerMTMON={{ mtmon_server }} '} 
+        - { regexp: '(?i)sitebkp', line: '    SiteBKP={{ site_bkp }} '} 
+    tags: configura_mtmon
+
+  - name: Atualizando tudo CPZIP 
+    command: /usr/local/bin/cpzip.pl
+    tags: atualizar
+
+  - name: Force Update 
+    command: /usr/local/Multitask/mtmon/bin/forcaUpload.pl 
+    tags: atualizar
+
+  - name: Executando Incluir Arquivos
+    command:  /usr/local/Multitask/mtadm/bin/IncluiArquivos.pl -a
+    tags: instalar_fim
+
+  - name: Verifica se tudo funciona 
+    command: /usr/local/Multitask/mtmon/bin/mtmon_evento.pl --aplicacao=teste --mensagem="Teste de conexao $(hostname)" --debug --eventual --severidade=0
+    tags: instalar_fim

@@ -1,0 +1,84 @@
+---
+
+- hosts: '{{ host }}'
+  user: charles.a
+
+  connection: ssh
+  become_user: root
+  become: true
+  become_method: sudo
+  connection: paramiko
+
+
+  vars:
+    ansible_sudo_flags: '-H'
+
+  tasks:
+
+  - name: Instalando pacotes do Centos 
+    when: ansible_distribution == "CentOS" or ansible_distribution == 'RedHat'
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 7
+    with_items:
+     - perl-Data-Dumper
+    tags: instalar
+
+  - name: Instalando  pacotes para o Debian 
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' 
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    with_items:
+     - liblwp-protocol-https-perl 
+     - sysstat 
+     - sharutils
+     - build-essential
+    tags: instalar
+
+  - name: Download do modulo do ansible para PERL
+    get_url: url=http://cpanmin.us/
+           dest=/tmp/cpanm.pl
+    tags: instalar
+
+  - name: Instalado o Modulo do ansible para PERL 
+    command: perl cpanm.pl App::cpanminus
+    args:
+       chdir: /tmp/
+       creates: /usr/local/bin/cpanm
+    tags: instalar
+
+  - name: Ajustando link simbolicos 
+    file: src=/usr/local/bin/cpanm
+          dest=/usr/bin/cpanm
+          state=link
+    ignore_errors: yes
+    tags: instalar
+
+  - name: Ajusta configuracao interativa do PERL 
+    shell: perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->commit'
+    register: install_cpanm
+    changed_when: "'is up to date' not in install_cpanm.stdout"
+    tags: instalar 
+
+  - name: Instala pacotes veeam 
+    cpanm: name={{ item }}
+    with_items:
+       - constant
+       - Carp
+       - Cwd
+       - Data::Dumper
+       - Encode
+       - Encode::Alias
+       - Encode::Config
+       - Encode::Encoding
+       - Encode::MIME::Name
+       - Exporter
+       - Exporter::Heavy
+       - File::Path
+       - File::Spec
+       - File::Spec::Unix
+       - File::Temp
+       - List::Util
+       - Scalar::Util
+       - Socket
+       - Storable
+       - threads
+    tags: instalar

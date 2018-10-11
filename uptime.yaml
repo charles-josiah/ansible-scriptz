@@ -1,0 +1,24 @@
+---
+- hosts: all
+  user: charles.a
+  connection: ssh
+  become_user: root
+  become: yes
+  become_method: sudo
+  connection: paramiko
+
+  tasks:
+    - name: ver hostname
+      command: /bin/hostname
+      changed_when: False
+      register: hostname
+
+    - name: ver uptime
+      shell: /usr/bin/uptime | grep -ohe 'up .*' | sed 's/,//g' | awk '{ print $2" "$3 }'
+      changed_when: False
+      register: uptime
+
+    - debug: var={{ item }}
+      with_items:
+#        - hostname.stdout
+        - uptime.stdout
