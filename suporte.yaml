@@ -1,6 +1,6 @@
 ---
-- hosts: lab4 
-  user: root 
+- hosts: all
+  user: charles.a 
   connection: ssh
   become_user: root
   become: yes
@@ -13,16 +13,21 @@
       - charles.a
       - wagner.f
       - gustavo.h
-      - geraldo.m
+
     remove_usuarios:
       - yuri
       - luiz.carlos
       - davi
       - wagner.fernanades
+      - wagner.f
+
     remove_user_sudo:
       - yuri
       - luiz.carlos 
       - davi 
+      - wagner.fernandes
+      - wagner.f
+
     ssh_chaves:
       - charles.a
       - wagner.f
@@ -99,8 +104,6 @@
       state=absent
     with_items: "{{ remove_user_sudo }}"
     tags: remove_sudores
-
-
 
   - name: Diretorio Chaves
     action: file path={{ chave_dir_dst }} state=directory
