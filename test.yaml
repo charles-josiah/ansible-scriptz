@@ -7,7 +7,13 @@
   become_method: sudo
   connection: paramiko
 
-  tasks:
-      - debug: var=ansible_date_time
+  vars:
+     ntpdate_server: pool.ntp.br
 
-      - debug: msg="the current date is {{ ansible_date_time.time }}"
+  tasks:
+     - name: Execute ntpdate runs
+       command: "ntpdate -s {{ ntpdate_server|default('0.pool.ntp.org') }}"
+
+     - debug: var=ansible_date_time
+
+     - debug: msg="the current date is {{ ansible_date_time.time }}"

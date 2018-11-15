@@ -1,5 +1,5 @@
 ---
-- hosts: all 
+- hosts: crm
   user: charles.a
   #become: true
   #become_user: root
