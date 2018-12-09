@@ -1,14 +1,13 @@
 ---
-
-- hosts: all 
+- hosts: srvoracle10
   user: charles.a
   connection: ssh
   become_user: root 
   become: true
-  #become_method: su
+#  become_method: su
   become_method: sudo
   gather_facts: true
-  connection: paramiko
+#  connection: paramiko
 
   vars:
 
@@ -54,7 +53,7 @@
 
   - name: Instalando atualizacoes SO - Centos 
     yum: name=* state=latest update_cache=yes
-    when: ansible_distribution == "CentOS"
+    when: ansible_distribution == "CentOS" or ansible_os_family == "RedHat" and ansible_distribution != "Fedora"
     tags: atualizar
 
   - name: Instalando atualizacoes SO - Debian
@@ -104,6 +103,7 @@
      - ntp
      - openssl-devel
      - perl-IO-Socket-SSL
+     - ansible 
     tags: instalar
 
   - name: Instalando pacotes do Debian

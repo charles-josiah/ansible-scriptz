@@ -1,6 +1,6 @@
 ---
-- hosts: all 
-  user: charles.a
+- hosts: srvoracle10
+  user: root
   connection: ssh
   become_user: root
   become: yes
@@ -48,6 +48,10 @@
   - name: Desliga SELinux
     selinux:  state=disabled
     when: ansible_distribution == "CentOS"
+
+  - name: Desliga SELinux
+    selinux:  state=disabled
+    when: ansible_os_family == "RedHat" and ansible_distribution != "Fedora"
 
   - name: Adcionar Usuarios padrao  
     user: 
@@ -171,8 +175,8 @@
   handlers:
     - name: restart sshd
       service: name=sshd state=restarted
-      when: ansible_distribution == 'CentOS'
- 
+      when: ansible_distribution == 'CentOS' or ansible_os_family == "RedHat" and ansible_distribution != "Fedora"
+
     - name: restart ssh
       service: name=ssh state=restarted
       when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
