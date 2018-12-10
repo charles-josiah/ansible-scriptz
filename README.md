@@ -22,6 +22,4 @@ desliga.yaml - script para desligamento de uma ambiente inteiro.
 
 suporte.yaml - script para suporte, adição/remoção de usuarios, chaves publicas para SSH, troca de senhas dos usuarios e ajustes no sudoers.
 
-uptime.yaml - script para demostrar o uptime dos servidores.
-
 zabbix.yaml - script em desenvolvimento para configuração do client zabbix.
