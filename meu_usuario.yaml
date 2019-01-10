@@ -1,6 +1,13 @@
 ---
 - hosts: all
   user: root
+  
+  vars:
+
+     pwd: "{{ lookup('password', '/dev/null length=17 chars=ascii_letters') }}"
+     chave_dir_ori: ../chaves
+     chave_arq_ori: charles.a.pub
+
 
   tasks:
 
@@ -17,3 +24,19 @@
      system: no  
      createhome: yes    
      home: /home/charles.a
+
+  - name: Set up authorized_keys for the deploy user
+    authorized_key: 
+      user=charles.a
+      key="{{ lookup('file', '{{ chave_dir_ori }}/{{ chave_arq_ori }}') }}"
+
+  - name: Add user to sudoers file
+    lineinfile:
+     backup: yes
+     path: /etc/sudoers
+     regexp: '^charles.a'
+     line: 'charles.a  ALL=(ALL) NOPASSWD: ALL'
+     validate: 'visudo -cf %s'
+
+
+

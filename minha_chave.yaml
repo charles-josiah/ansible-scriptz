@@ -5,7 +5,7 @@
   #become_user: root
   
   vars: 
-     chave_dir_ori: /Users/charles.a/Acessos/Ansible/chaves
+     chave_dir_ori: ../chaves
      chave_arq_ori: charles.a.pub
      chave_dir_dst:  ~/.ssh
      chave_arq_dst: authorized_keys
