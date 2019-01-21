@@ -1,6 +1,13 @@
 ---
-- hosts: all
-  user: root
+- hosts: zabbix
+  user: appliance
+  connection: ssh
+  become_user: root
+  become: yes
+  become_method: su
+  connection: paramiko
+  gather_facts: false
+
   
   vars:
 

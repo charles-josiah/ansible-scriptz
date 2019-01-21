@@ -1,6 +1,6 @@
 ---
 
-- hosts: all 
+- hosts: zabbix
   user: charles.a 
 
   connection: ssh
@@ -13,10 +13,11 @@
   vars:
     ansible_sudo_flags: '-H'
     mtmon_config: /usr/local/Multitask/mtadm/etc/mtadm.conf
+    #transkey: WEnxTVMi
     #transkey: d78C8gGG  
     #transkey: Ne4vO8pw
     #transkey: EFbVeAiC 
-    #nome_cliente: higex
+    nome_cliente: xxxxxx  
     mtmon_server: '177.19.228.142, 189.72.110.218, 200.175.53.1'
     site_bkp: '170.84.17.136'
 
