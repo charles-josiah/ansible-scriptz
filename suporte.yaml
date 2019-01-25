@@ -1,12 +1,12 @@
 ---
-- hosts: centos
+- hosts: lnx 
   user: charles.a
   connection: ssh
   become_user: root
   become: yes
   become_method: sudo
   connection: paramiko
-  gather_facts: true 
+  gather_facts: yes
 
   vars:
     novos_usuarios:

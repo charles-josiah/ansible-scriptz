@@ -1,0 +1,10 @@
+---
+- hosts:  all[0] 
+  connection: local
+
+  vars_file:
+      - ../{{ inventory_dir if inventory_dir else (ansible_inventory_sources[0] | dirname) }}/mtmon.yaml
+
+
+  tasks:
+     - debug: var=inventory_dir

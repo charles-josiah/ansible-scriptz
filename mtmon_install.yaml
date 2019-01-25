@@ -1,14 +1,12 @@
 ---
-
-- hosts: zabbix
+- hosts: srvsto03 
   user: charles.a 
-
   connection: ssh
   become_user: root
   become: true
   become_method: sudo
-  connection: paramiko
-
+  connection: paramiko 
+  gather_facts: yes
 
   vars:
     ansible_sudo_flags: '-H'
@@ -17,11 +15,12 @@
     #transkey: d78C8gGG  
     #transkey: Ne4vO8pw
     #transkey: EFbVeAiC 
-    nome_cliente: xxxxxx  
+    #nome_cliente: xxxxxx  
     mtmon_server: '177.19.228.142, 189.72.110.218, 200.175.53.1'
     site_bkp: '170.84.17.136'
 
   tasks:
+  - debug: msg="Nome {{ nome_cliente }} e chave  {{ transkey }}"
 
   - name: Instalando pacotes do Centos 
     when: ansible_distribution == "CentOS" or ansible_distribution == 'RedHat'

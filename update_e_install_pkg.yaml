@@ -1,13 +1,13 @@
 ---
 
-- hosts: lab4
+- hosts: srvsto03
   #'{{ host }}'
-  user: root
+  user: charles.a
   connection: ssh
   become_user: root 
   become: true
-  become_method: su
-  #become_method: sudo
+  #become_method: su
+  become_method: sudo
   gather_facts: true 
   connection: paramiko
 
