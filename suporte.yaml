@@ -1,5 +1,5 @@
 ---
-- hosts: lnx 
+- hosts: srvsto03 
   user: charles.a
   connection: ssh
   become_user: root
@@ -32,6 +32,10 @@
       - gustavo.h
       - geraldo.m
 
+    desliga_servicos:
+      - postfix
+      - firewalld
+
     sshd_config: /etc/ssh/sshd_config
     chave_dir_ori: /Users/charles.a/Acessos/Ansible/chaves
     chave_dir_dst: /etc/ssh/chaves 
@@ -47,6 +51,15 @@
   - name: Desliga SELinux
     selinux:  state=disabled
     when: ansible_distribution == "CentOS"
+
+  - name: Desliga Servicos 
+    service:
+      name={{ item }}
+      state=stopped
+      enabled=no
+    with_items: "{{ desliga_servicos }}"
+ 
+
 
   - name: Adcionar Usuarios padrao  
     user: 
