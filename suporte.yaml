@@ -1,11 +1,11 @@
 ---
-- hosts: srvsto03 
+- hosts: srvfw01
   user: charles.a
   connection: ssh
   become_user: root
   become: yes
   become_method: sudo
-  connection: paramiko
+  #connection: paramiko
   gather_facts: yes
 
   vars:
@@ -40,7 +40,6 @@
     chave_dir_ori: /Users/charles.a/Acessos/Ansible/chaves
     chave_dir_dst: /etc/ssh/chaves 
     ansible_sudo_flags: '-H'
-
     pwd_alias: "{{ lookup('password', '/dev/null length=17 chars=ascii_letters') }}"
 
   tasks:
@@ -58,7 +57,7 @@
       state=stopped
       enabled=no
     with_items: "{{ desliga_servicos }}"
- 
+    ignore_errors: yes 
 
 
   - name: Adcionar Usuarios padrao  
@@ -173,7 +172,7 @@
     user: 
       name={{ item }}
       state=present
-      password="{{ "{{pwd_alias}}" | password_hash('sha1024') }}"
+      password="{{ "{{pwd_alias}}" | password_hash('sha512') }}"
       shell=/bin/bash
       update_password=always
     with_items: "{{ novos_usuarios }}"

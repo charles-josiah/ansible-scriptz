@@ -1,26 +1,25 @@
 ---
 
-- hosts: srvsto03
-  #'{{ host }}'
+- hosts: zimbra 
   user: charles.a
   connection: ssh
   become_user: root 
   become: true
-  #become_method: su
   become_method: sudo
+  #become_method: sudo
   gather_facts: true 
-  connection: paramiko
+  #connection: paramiko
 
   vars:
+
 
   #proxy_env:
   #  http_proxy: http://10.5.50.198:3128
   
   #ansible_sudo_flags: '-H'
 
-  #environment:
+  environment:
   #  http_proxy: http://10.5.50.198:3128
-
 
   pre_tasks:
 
@@ -105,6 +104,7 @@
      - ntp
      - openssl-devel
      - perl-IO-Socket-SSL
+     - yum-utils
     tags: instalar
 
   - name: Instalando pacotes do Debian
@@ -128,4 +128,7 @@
      - sysstat
      - wget
      - open-vm-tools
+     - sshpass
+     - screen
+     - bind-utils
     tags: instalar
