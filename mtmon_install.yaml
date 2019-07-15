@@ -1,5 +1,5 @@
 ---
-- hosts: srvfb02 
+- hosts: virtual-fln 
   user: charles.a 
   connection: ssh
   become_user: root
@@ -11,12 +11,7 @@
   vars:
     ansible_sudo_flags: '-H'
     mtmon_config: /usr/local/Multitask/mtadm/etc/mtadm.conf
-    #transkey: WEnxTVMi
-    #transkey: d78C8gGG  
-    #transkey: Ne4vO8pw
-    #transkey: EFbVeAiC 
-    #nome_cliente: xxxxxx  
-    mtmon_server: '177.19.228.142, 189.72.110.218, 200.175.53.1'
+    mtmon_server: '179.127.167.154'
     site_bkp: '170.84.17.136'
 
   tasks:

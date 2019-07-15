@@ -1,14 +1,14 @@
 ---
 
-- hosts: zimbra 
-  user: charles.a
+- hosts: zimbra
+  user: root
   connection: ssh
-  become_user: root 
-  become: true
+  #become_user: root 
+  #become: true
+  #become_method: su
   become_method: sudo
-  #become_method: sudo
-  gather_facts: true 
-  #connection: paramiko
+  gather_facts: no  #true 
+  connection: paramiko
 
   vars:
 
@@ -22,6 +22,12 @@
   #  http_proxy: http://10.5.50.198:3128
 
   pre_tasks:
+
+  - name: 'install python2'
+    raw: apt-get -y install sudo 
+    ignore_errors: yes
+
+
 
   - name: 'install python2'
     raw: sudo apt-get -y install python-simplejson
@@ -70,6 +76,7 @@
   - name: Yum install Ansible RH 7
     yum: name=ansible,python-pip,python-jinja2,sshpass,openssh-clients,wget update_cache=yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7 and ansible_distribution != "Fedora"
+    ignore_errors: yes
     tags: instalar
 
   
@@ -105,6 +112,7 @@
      - openssl-devel
      - perl-IO-Socket-SSL
      - yum-utils
+     - bind-utils
     tags: instalar
 
   - name: Instalando pacotes do Debian
@@ -130,5 +138,5 @@
      - open-vm-tools
      - sshpass
      - screen
-     - bind-utils
+
     tags: instalar

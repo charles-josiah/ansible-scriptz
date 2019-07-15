@@ -1,20 +1,18 @@
 ---
-- hosts: zimbra
-  user: root 
+- hosts: srvdns01
+  user: super
   connection: ssh
   #become_user: root
-  #become: yes
-  #become_method: su
+  become: yes
+  become_method: su
   connection: paramiko
-  gather_facts: false
+  gather_facts: true 
 
-  
   vars:
 
      pwd: "{{ lookup('password', '/dev/null length=17 chars=ascii_letters') }}"
      chave_dir_ori: ../chaves
      chave_arq_ori: charles.a.pub
-
 
   tasks:
 

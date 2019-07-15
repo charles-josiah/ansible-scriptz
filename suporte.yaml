@@ -1,11 +1,11 @@
 ---
-- hosts: srvfw01
-  user: charles.a
+- hosts: all 
+  user: charles.a 
   connection: ssh
   become_user: root
   become: yes
   become_method: sudo
-  #connection: paramiko
+  connection: paramiko
   gather_facts: yes
 
   vars:

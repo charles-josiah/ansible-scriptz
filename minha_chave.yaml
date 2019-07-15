@@ -1,6 +1,6 @@
 ---
-- hosts: all 
-  user: temp
+- hosts: all
+  user: charles.a
   #become: true
   #become_user: root
   
