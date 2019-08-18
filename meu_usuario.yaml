@@ -1,10 +1,10 @@
 ---
-- hosts: srvdns01
-  user: super
+- hosts:  
+  user: root 
   connection: ssh
   #become_user: root
-  become: yes
-  become_method: su
+  #become: yes
+  #become_method: sudo
   connection: paramiko
   gather_facts: true 
 

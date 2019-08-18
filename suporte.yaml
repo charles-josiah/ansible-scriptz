@@ -1,10 +1,10 @@
 ---
-- hosts: all 
-  user: charles.a 
+- hosts:
+  user: super 
   connection: ssh
-  become_user: root
+  become_user: root 
   become: yes
-  become_method: sudo
+  become_method: su
   connection: paramiko
   gather_facts: yes
 

@@ -1,0 +1,118 @@
+---
+- hosts: 
+  user: charles.a
+  connection: ssh
+  become_user: root
+  become: yes
+  become_method: sudo
+  connection: paramiko
+  gather_facts: yes
+
+  vars:
+
+    ssh_chaves:
+      - charles.a
+
+    sshd_config: /etc/ssh/sshd_config
+    chave_dir_ori: /Users/charles.a/Acessos/Ansible/chaves
+    chave_dir_dst: /etc/ssh/chaves
+    ansible_sudo_flags: '-H'
+    pwd_alias: "{{ lookup('password', '/dev/null length=17 chars=ascii_letters') }}"
+    sudo_config: /etc/sudoers
+
+  tasks:
+
+  - name: Adicionado grupo 'wheel'
+    group:
+      name: wheel
+      state: present
+    tags: adiciona_wheel
+
+  - name: Adiciona grupo %grpadminlinux e usuario charles para sem senha
+    lineinfile:
+      backup=yes
+      dest="{{ sudo_config }}"
+      line="{{ item.line }}"
+      insertafter="{{ item.insertafter }}"
+    with_items:
+          - { line: '%grpadminlinux ALL=(ALL) ALL ', insertafter: EOF }
+          - { line: '%wheel ALL=(ALL) ALL ', insertafter: EOF }
+          - { line: 'charles.a ALL=(ALL) NOPASSWD: ALL ', insertafter: EOF }
+
+  - name: Criando diretorios das Chaves SSH
+    action: file path={{ chave_dir_dst }} state=directory
+      owner=0 group=0 mode=0755
+    tags: adiciona_chaves
+
+  - name: Copiando as chaves SSH
+    action: copy src={{ chave_dir_ori }}/{{ item }}.pub
+       dest={{ chave_dir_dst }}
+       owner=0 group=0 mode=644
+    with_items: "{{ ssh_chaves }}"
+    tags: adiciona_chaves
+
+  - name: Deixando o sshd nas permissoes corretas  /etc/ssh/sshd_config
+    file:
+      path: /etc/ssh/sshd_config
+      state: file
+      mode: 0600
+      owner: root
+      group: root
+
+  - name: Remove configuracoes antigas
+    lineinfile:
+      backup=yes
+      dest="{{ sshd_config }}"
+      state=absent
+      regexp="(?i)^{{ item }}"
+    with_items:
+        - AllowGroups
+        - AllowUsers
+        - DenyUsers
+        - PermitRootLogin
+        - X11Forwarding
+        - AuthorizedKeysFile
+        - MaxAuthTries
+        - Ciphers
+        - ClientAliveCountMax
+    tags: configura_ssh
+
+  - name: Modifca algumas linhas do ssh - handering
+    lineinfile:
+      backup=yes
+      dest="{{ sshd_config }}"
+      regexp="{{ item.regexp }}"
+      line="{{ item.line }}"
+    with_items:
+        - { regexp: '(?i)^.PermitRootLogin', line: 'PermitRootLogin no' }
+        - { regexp: '(?i)^.AuthorizedKeysFile', line: 'AuthorizedKeysFile {{ chave_dir_dst }}/%u.pub ' }
+        - { regexp: '(?i)^.X11Forwarding', line: 'X11Forwarding no' }
+        - { regexp: '(?i)^.MaxAuthTries', line: 'MaxAuthTries 4' }
+        - { regexp: '(?i)^.PermitUserEnvironment', line: 'PermitUserEnvironment no' }
+        - { regexp: '(?i)^.Ciphers', line: 'Ciphers aes128-ctr,aes192-ctr,aes256-ctr' }
+        - { regexp: '(?i)^.ClientAliveCountMax', line: 'ClientAliveCountMax 0' }
+
+  - name: Permite grupo whell acesso e grpadminlinux ao sistema
+    lineinfile:
+      dest="{{ sshd_config }}"
+      line="{{ item.line }}"
+      insertafter="{{ item.insertafter }}"
+    with_items:
+          - { line: 'AllowGroups wheel grpadminlinux', insertafter: EOF }
+          - { line: 'DenyUsers ALL', insertafter: EOF }
+    notify:
+       - restart ssh
+       - restart sshd
+    tags: configura_ssh
+
+  handlers:
+    - name: restart sshd
+      service: name=sshd state=restarted
+      when: (ansible_distribution == 'Red Hat Enterprise Linux') or
+            (ansible_distribution == 'RedHat') or
+            (ansible_distribution == 'CentOS') or
+            (ansible_distribution == 'OracleLinux')
+
+    - name: restart ssh
+      service: name=ssh state=restarted
+      when: (ansible_distribution == 'Debian') or (ansible_distribution == 'Ubuntu')

@@ -20,5 +20,5 @@
 
     - debug: var={{ item }}
       with_items:
-#        - hostname.stdout
+        - hostname.stdout
         - uptime.stdout

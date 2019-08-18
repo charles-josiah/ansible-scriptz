@@ -1,0 +1,65 @@
+---
+- hosts: 
+  user: root
+  connection: ssh
+  become_user: root
+  become: yes
+  become_method: sudo
+  connection: paramiko
+  gather_facts: yes
+
+  vars:
+    dir_arq: /Users/charles.a/Acessos/Ansible/scripts/< dominio  >/files
+    sssd_config: /etc/sssd/sssd.conf
+    krb5_config: /etc/krb5.conf
+    ansible_sudo_flags: '-H'
+    user_dominio: charles.a@<dominio>
+    dominio: <dominio> 
+
+
+  vars_prompt:
+      - name: "bind_password"
+        prompt: "Insira sua senha do dominio: "
+        private: yes
+
+  tasks:
+    - name: Instalado pacotes
+      yum:
+        name: realmd,sssd,oddjob,oddjob-mkhomedir,adcli,samba-common,samba-common-tools,ntpdate,ntp,python-pip
+        state: present
+      notify:
+        - restart realmd
+
+    - name: Install pexpect using pip
+      pip:
+        name: pexpect
+
+
+    - name: Adiciona a maquina no dominio
+      expect:
+        command: /bin/bash -c "/usr/sbin/realm join --user={{ user_dominio }} {{ dominio }}"
+        responses:
+          Password for *: "{{ bind_password }}"
+          Senha *: "{{ bind_password }}"
+
+    - name: Copia arquivos sssd.conf
+      action:
+        copy src={{ dir_arq }}/sssd.conf dest={{ sssd_config }} backup=yes
+      notify:
+        - restart realmd
+    - name: Copia arquivo krbd5.conf
+      action:
+         copy src={{ dir_arq }}/krb5.conf dest={{ krb5_config }} backup=yes
+      notify:
+        - restart realmd
+
+  handlers:
+    - name: restart realmd
+      service:
+        name: realmd
+        state: restarted
+
+    - name: restart sssd
+      service:
+        name: sssd
+        state: restarted

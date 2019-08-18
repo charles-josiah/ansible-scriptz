@@ -2,9 +2,17 @@
 
 Repositorio com scripts ansible legais e uteis do nosso dia a dia.
 
-test.yaml - script ansible para mostrar hostname, data, hora, timezone muito util para virada de horarios
+ver_hora.yaml - script ansible para mostrar hostname, data, hora, timezone muito util para virada de horarios
 
 update_e_install_pkg.yaml - script ansible para config inicial de um servidor, setando os pacotes iniciais.
+
+update.yaml - script ansible para atualizacao do sistema operacional.
+
+epel.yaml - configura epel no sistema operacional.
+
+sssd.yaml - adicao da maquina no domino Microsoft.
+
+ssh_hand.yaml - faz 'handering' no ssh, adiciona grupos que permitem acesso, sudo e adiciona meu usuario :D . 
 
 veeam.yaml - instala pacotes perl necessarios para o cliente VEEAM BACKUP nos servidores linux.
 
