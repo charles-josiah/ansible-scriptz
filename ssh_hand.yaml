@@ -1,5 +1,5 @@
 ---
-- hosts: 
+- hosts: all 
   user: charles.a
   connection: ssh
   become_user: root
@@ -35,7 +35,7 @@
       line="{{ item.line }}"
       insertafter="{{ item.insertafter }}"
     with_items:
-          - { line: '%grpadminlinux ALL=(ALL) ALL ', insertafter: EOF }
+#          - { line: '%grpadminlinux ALL=(ALL) ALL ', insertafter: EOF }
           - { line: '%wheel ALL=(ALL) ALL ', insertafter: EOF }
           - { line: 'charles.a ALL=(ALL) NOPASSWD: ALL ', insertafter: EOF }
 
@@ -98,7 +98,7 @@
       line="{{ item.line }}"
       insertafter="{{ item.insertafter }}"
     with_items:
-          - { line: 'AllowGroups wheel grpadminlinux', insertafter: EOF }
+          - { line: 'AllowGroups wheel ', insertafter: EOF }
           - { line: 'DenyUsers ALL', insertafter: EOF }
     notify:
        - restart ssh

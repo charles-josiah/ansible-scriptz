@@ -1,6 +1,6 @@
 ---
-- hosts: all 
-  user: charles.a 
+- hosts: SRV-ANTISPAM01
+  user: charles.a
   connection: ssh
   become_user: root 
   become: yes
@@ -8,14 +8,35 @@
   connection: paramiko
   gather_facts: yes
 
-  ##### Mais variaveis no group_var
-
   vars:
+    novos_usuarios:
+      - charles.a
+      - gustavo.h
+      - geraldo.m
+
+    remove_usuarios:
+      - yuri
+      - luiz.carlos
+      - davi
+      - wagner.fernanades
+      - wagner.f
+
+    remove_user_sudo:
+      - yuri
+      - luiz.carlos 
+      - davi 
+      - wagner.fernanades
+      - wagner.f
+
+    ssh_chaves:
+      - charles.a
+      - gustavo.h
+      - geraldo.m
+
     desliga_servicos:
       - postfix
       - firewalld
 
-    banner: /etc/issue.net
     sshd_config: /etc/ssh/sshd_config
     chave_dir_ori: /Users/charles.a/Acessos/Ansible/chaves
     chave_dir_dst: /etc/ssh/chaves 
@@ -142,41 +163,10 @@
         - { regexp: '(?i)^.PermitUserEnvironment', line: 'PermitUserEnvironment no' }
         - { regexp: '(?i)^.Ciphers', line: 'Ciphers aes128-ctr,aes192-ctr,aes256-ctr' }
         - { regexp: '(?i)^.ClientAliveCountMax', line: 'ClientAliveCountMax 0' }
-        - { regexp: '(?i)^.Banner', line: 'Banner {{ banner }} ' }
     notify:
        - restart ssh
        - restart sshd
     tags: configura_ssh
-
-  - name: Remove issue.net
-    file:
-      path="{{ banner }}"  
-      state=absent
-
-
-  - name: Cria issue.net
-    file:
-      path="{{ banner }}"
-      state=touch
-
-
-  - name: Configura banner 
-    lineinfile:
-      dest="{{ banner }}"
-      state=present 
-      line="{{ item }}" 
-    with_items:
-      - " + ---------------------------------------------------------------------------------------------------------------------------------------------+"  
-      - " | ALERT! You are entering into a secured area! Your IP, Login Time, Username has been noted and has been sent to the server administrator!     |"
-      - " | This service is restricted to authorized users only. All activities on this system are logged.                                               |"
-      - " | Unauthorized access will be fully investigated and reported to the appropriate law enforcement agencies.                                     |"
-      - " +--------------------------------------------------------------------------------------------------------------------------------------------- +"
-      - " | ALERTA! Voce esta entrando em uma area segura! Seu IP, Horario de login, Nome de usuario foi anotado e enviado ao administrador do servidor! |"
-      - " | Este servico e restrito apenas a usuarios autorizados. Todas as atividades neste sistema sao registradas.                                    |"
-      - " | O acesso nao autorizado sera totalmente investigado e relatado as agencias policiais apropriadas.                                            |"
-      - " + -------------------------------------------------------------------------------------------------------------------------------------------- +"
-    tags: configura_ssh
-
 
   - name: Limpa AllowUsers e DenyUsers  antigos 
     lineinfile:
@@ -195,7 +185,7 @@
       line="{{ item.line }}"
       insertafter="{{ item.insertafter }}"
     with_items:
-          - { line: 'AllowGroups {{ grupo_ssh }}', insertafter: EOF }
+          - { line: 'AllowGroups wheel', insertafter: EOF }
           - { line: 'DenyUsers ALL', insertafter: EOF }
     notify:
        - restart ssh

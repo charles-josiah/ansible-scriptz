@@ -1,21 +1,15 @@
 ---
-- hosts: 
-  user: root
+- hosts: crfapp11
+  user: charles.a
   connection: ssh
   become_user: root
   become: yes
-  become_method: sudo
+  become_method: su
   connection: paramiko
   gather_facts: yes
 
   vars:
-    dir_arq: /Users/charles.a/Acessos/Ansible/scripts/< dominio  >/files
-    sssd_config: /etc/sssd/sssd.conf
-    krb5_config: /etc/krb5.conf
-    ansible_sudo_flags: '-H'
-    user_dominio: charles.a@<dominio>
-    dominio: <dominio> 
-
+  #CONFERIR AS VARIAVEIS DO HOSTS
 
   vars_prompt:
       - name: "bind_password"
@@ -34,6 +28,13 @@
       pip:
         name: pexpect
 
+    - name: Saindo do domino
+      expect:
+        command: /bin/bash -c "/usr/sbin/realm leave --user={{ user_dominio }} {{ dominio }}"
+        responses:
+          Password for *: "{{ bind_password }}"
+          Senha *: "{{ bind_password }}"
+      ignore_errors: yes
 
     - name: Adiciona a maquina no dominio
       expect:
@@ -47,11 +48,17 @@
         copy src={{ dir_arq }}/sssd.conf dest={{ sssd_config }} backup=yes
       notify:
         - restart realmd
+
     - name: Copia arquivo krbd5.conf
       action:
          copy src={{ dir_arq }}/krb5.conf dest={{ krb5_config }} backup=yes
       notify:
         - restart realmd
+
+    - name: Adicionando SSSD no boot 
+      service:
+         name: sssd 
+         enabled: yes
 
   handlers:
     - name: restart realmd
@@ -63,3 +70,11 @@
       service:
         name: sssd
         state: restarted
+
+    - name: restart sshd 
+      service:
+        name: sshd 
+        state: restarted
+
+
+

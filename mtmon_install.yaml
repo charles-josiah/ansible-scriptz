@@ -1,11 +1,11 @@
 ---
-- hosts: 
+- hosts: all
   user: charles.a
   connection: ssh
   become_user: root
   become: true
   become_method: sudo
-  #connection: paramiko
+  connection: paramiko
   gather_facts: yes
 
   vars:
@@ -31,7 +31,7 @@
      - libselinux-python
      - perl-CPAN
      - perl-Crypt-SSLeay
-     - "@Development tools"
+#     - "@Development tools"
      - perl-Crypt-SSLeay.x86_64
      - perl-CGI
      - sharutils
@@ -69,7 +69,7 @@
     tags: instalar
 
   - name: Ajusta configuracao interativa do PERL
-    shell: perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->commit'
+    shell: echo y | perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->edit(connect_to_internet_ok => 1 );  $c->commit' 
     register: install_cpanm
     changed_when: "'is up to date' not in install_cpanm.stdout"
     tags: instalar
@@ -97,16 +97,16 @@
     tags: instalar
 
   - name: Baixando pacotes MTMON - inst_mtadm
-    get_url: url=http://200.175.53.1/install/inst_mtadm
+    get_url: url=http://mtmon.multitask.com.br/install/inst_mtadm
            dest=/tmp/inst_mtadm
 
 
   - name: Baixando pacotes MTMON - inst_mtmon_client
-    get_url: url=http://200.175.53.1/install/inst_mtmon_client
+    get_url: url=http://mtmon.multitask.com.br/install/inst_mtmon_client
            dest=/tmp/inst_mtmon_client
 
   - name: Baixando pacotes MTMON - inst_mtmon_send
-    get_url: url=http://200.175.53.1/install/inst_mtsend
+    get_url: url=http://mtmon.multitask.com.br/install/inst_mtsend
            dest=/tmp/inst_mtsend
 
   - name: executa mtmon - inst_mtadm
@@ -125,6 +125,7 @@
        cron_file=MTMON
        state=absent
     tags: instalar_cron
+    ignore_errors: yes 
 
   - name: Configura o CRON do MTMON
     cron:

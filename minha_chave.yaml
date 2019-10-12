@@ -1,8 +1,8 @@
 ---
-- hosts: 
+- hosts: all 
   user: charles.a
-  become: true
-  become_user: root
+  #become: true
+  #become_user: root
   
   vars: 
      chave_dir_ori: ../chaves
