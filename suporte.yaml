@@ -1,5 +1,5 @@
 ---
-- hosts: heosc-03-sto 
+- hosts: all 
   user: root
   connection: ssh
   become_user: root 

@@ -1,5 +1,5 @@
 ---
-- hosts: crfapp11
+- hosts: all 
   user: charles.a
   connection: ssh
   become_user: root
