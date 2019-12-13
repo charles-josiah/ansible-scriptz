@@ -11,7 +11,7 @@
   vars:
     ansible_sudo_flags: '-H'
     mtmon_config: /usr/local/Multitask/mtadm/etc/mtadm.conf
-    mtmon_server: '179.127.167.154'
+    mtmon_server: '189.45.197.30'
     site_bkp: '170.84.17.136'
 
   tasks:
@@ -97,16 +97,16 @@
     tags: instalar
 
   - name: Baixando pacotes MTMON - inst_mtadm
-    get_url: url=http://mtmon.multitask.com.br/install/inst_mtadm
+    get_url: url=http://mtfln.multitask.com.br/install/inst_mtadm
            dest=/tmp/inst_mtadm
 
 
   - name: Baixando pacotes MTMON - inst_mtmon_client
-    get_url: url=http://mtmon.multitask.com.br/install/inst_mtmon_client
+    get_url: url=http://mtfln.multitask.com.br/install/inst_mtmon_client
            dest=/tmp/inst_mtmon_client
 
   - name: Baixando pacotes MTMON - inst_mtmon_send
-    get_url: url=http://mtmon.multitask.com.br/install/inst_mtsend
+    get_url: url=http://mtfln.multitask.com.br/install/inst_mtsend
            dest=/tmp/inst_mtsend
 
   - name: executa mtmon - inst_mtadm
@@ -174,7 +174,7 @@
     tags: instalar_cron
 
 
-  - name: Modifca algumas linhas do ssh
+  - name: Modifca algumas linhas do mtadm
     lineinfile:
       dest="{{ mtmon_config }}"
       regexp="{{ item.regexp }}"
