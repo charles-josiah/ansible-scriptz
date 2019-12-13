@@ -1,6 +1,6 @@
 ---
-- hosts: all 
-  user: charles.a
+- hosts: zimbracdl 
+  user: root 
   #become: true
   #become_user: root
   

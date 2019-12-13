@@ -1,6 +1,6 @@
 ---
-- hosts: all 
-  user: charles.a 
+- hosts: heosc-03-sto 
+  user: root
   connection: ssh
   become_user: root 
   become: yes

@@ -1,10 +1,10 @@
 ---
-- hosts: all 
-  user: super 
+- hosts: zimbracdl 
+  user: root  
   connection: ssh
-  become_user: root
-  become: yes
-  become_method: sudo
+  #become_user: root
+  #become: yes
+  #become_method: sudo
   connection: paramiko
   gather_facts: true 
 
