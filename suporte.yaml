@@ -1,11 +1,11 @@
 ---
-- hosts: all 
-  user: root
+- hosts: all
+  user: charles.a
   connection: ssh
   become_user: root 
   become: yes
   become_method: sudo
-  connection: paramiko
+  #connection: paramiko
   gather_facts: yes
 
   ##### Mais variaveis no group_var
@@ -41,7 +41,7 @@
 
 
   - name: Adcionar Usuarios padrao  
-    user: 
+    user:
      name={{ item }}
      state=present
      password= "{{ "{{pwd_alias}}" | password_hash('sha512') }}"
@@ -203,7 +203,7 @@
     tags: configura_ssh
 
   - name: Atualiza senhas
-    user: 
+    user:
       name={{ item }}
       state=present
       password="{{ "{{pwd_alias}}" | password_hash('sha512') }}"

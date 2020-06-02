@@ -1,6 +1,6 @@
 ---
-- hosts: all 
-  user: charles.a 
+- hosts: all
+  user: charles.a
   connection: ssh
   become_user: root
   become: yes

@@ -1,6 +1,6 @@
 ---
-- hosts: zimbracdl 
-  user: root 
+- hosts: all
+  user: charles.a
   #become: true
   #become_user: root
   
@@ -9,7 +9,6 @@
      chave_arq_ori: charles.a.pub
      chave_dir_dst:  ~/.ssh
      chave_arq_dst: authorized_keys
-
 
   tasks:
   - name: Criar diretorio 

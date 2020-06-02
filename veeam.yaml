@@ -1,13 +1,14 @@
 ---
 
-- hosts: '{{ host }}'
+- hosts: all
   user: charles.a
-
   connection: ssh
   become_user: root
-  become: true
+  become: yes
   become_method: sudo
-  connection: paramiko
+  #connection: paramiko
+  gather_facts: yes
+
 
 
   vars:
@@ -15,12 +16,17 @@
 
   tasks:
 
-  - name: Instalando pacotes do Centos 
-    when: ansible_distribution == "CentOS" or ansible_distribution == 'RedHat'
+  - name: Instalando pacotes do Centos/RedHat/OracleLinux
+    when: (ansible_distribution == 'Red Hat Enterprise Linux') or
+          (ansible_distribution == 'RedHat') or
+          (ansible_distribution == 'CentOS') or
+          (ansible_distribution == 'OracleLinux')
     action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 7
     with_items:
+     - "@Development tools"
+     - perl
      - perl-Data-Dumper
+     - perl-CPAN
     tags: instalar
 
   - name: Instalando  pacotes para o Debian 
@@ -53,7 +59,7 @@
     tags: instalar
 
   - name: Ajusta configuracao interativa do PERL 
-    shell: perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->commit'
+    shell: echo y | perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->edit(connect_to_internet_ok => 1 );  $c->commit'
     register: install_cpanm
     changed_when: "'is up to date' not in install_cpanm.stdout"
     tags: instalar 

@@ -1,3 +1,13 @@
+#
+#   72  yum install "perl(ExtUtils::Embed)"
+##   73  yum install perl(LWP::UserAgent) 
+#   74  yum install "perl(LWP::UserAgent)" 
+#   75  yum install "perl(HTTP::Response)" 
+#
+
+
+
+
 ---
 - hosts: all
   user: charles.a
@@ -5,7 +15,7 @@
   become_user: root
   become: true
   become_method: sudo
-  connection: paramiko
+  #connection: paramiko
   gather_facts: yes
 
   vars:
@@ -26,18 +36,35 @@
     when: ansible_distribution == "CentOS" or ansible_distribution == 'RedHat'
     action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
+    ignore_errors: yes
     with_items:
      - python-simplejson
      - libselinux-python
      - perl-CPAN
      - perl-Crypt-SSLeay
-#     - "@Development tools"
      - perl-Crypt-SSLeay.x86_64
      - perl-CGI
      - sharutils
      - perl-JSON
      - openssl-devel
     tags: instalar
+
+
+  - name: install the 'Development tools' package group
+    yum:
+      name: "@Development tools"
+      state: present
+
+  - name: install the sysstat package 
+    yum:
+      name: sysstat 
+      state: present
+
+
+
+  - name: Instalando sharutils
+    shell: dnf -y --enablerepo=PowerTools install sharutils
+    ignore_errors: yes
 
   - name: Instalando  pacotes para o Debian
     when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
@@ -69,10 +96,12 @@
     tags: instalar
 
   - name: Ajusta configuracao interativa do PERL
-    shell: echo y | perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->edit(connect_to_internet_ok => 1 );  $c->commit' 
+    shell: echo y | perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->edit(connect_to_internet_ok => 1 );  $c->commit;' 
     register: install_cpanm
     changed_when: "'is up to date' not in install_cpanm.stdout"
     tags: instalar
+
+
 
   - name: Instala pacotes MTMON
     cpanm: name={{ item }}
@@ -88,6 +117,7 @@
         - Net::Telnet::Cisco
         - Text::ParseWords
         - Template
+        - HTTP::Headers
 #        - IO::Socket::INET6
         - IO::Socket::IP
         - IO::Socket::SSL
@@ -195,9 +225,9 @@
     command: /usr/local/Multitask/mtmon/bin/forcaUpload.pl
     tags: atualizar
 
-  - name: Executando Incluir Arquivos
-    command:  /usr/local/Multitask/mtadm/bin/IncluiArquivos.pl -a
-    tags: instalar_fim
+#  - name: Executando Incluir Arquivos
+#    command:  /usr/local/Multitask/mtadm/bin/IncluiArquivos.pl -a
+#    tags: instalar_fim
 
   - name: Verifica se tudo funciona
     command: /usr/local/Multitask/mtmon/bin/mtmon_evento.pl --aplicacao=teste --mensagem="Teste de conexao $(hostname)" --debug --eventual --severidade=0

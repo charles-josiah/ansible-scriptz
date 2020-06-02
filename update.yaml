@@ -1,19 +1,22 @@
+####
+## remove ryum remove libvirt* -y
+
 ---
 
-- hosts: all 
-  user: charles.a 
+- hosts: all
+  user: charles.a
   connection: ssh
   become_user: root
   become: true
   become_method: sudo
   gather_facts: true
-  connection: paramiko
+  #connection: paramiko
 
   vars:
 
   pre_tasks:
 
-  - name: 'install python2'
+  - name: 'install sudo'
     raw: apt-get -y install sudo
     ignore_errors: yes
 
@@ -37,13 +40,30 @@
     raw: sudo yum install -y ansible
     ignore_errors: yes
 
+  - name: Instalando phyton ansible CentOS 8 e RHEL 8
+    raw:  sudo dnf install python3 python3-pip -y
+    ignore_errors: yes
+
+  - name: Instalando phyton ansible CentOS 8 e RHEL 8
+    raw:  sudo yum install python3 python3-pip -y
+    ignore_errors: yes
+
+  - name: Criando um link simbolico, phyton3 para phyton
+    raw: sudo ln -s /usr/bin/python3 /usr/bin/python
+    ignore_errors: yes
+
+  - name: Limpando Centos 8
+    raw:  sudo dnf clean all && sudo rm -r /var/cache/dnf  && sudo dnf upgrade -y && sudo dnf update -y & echo hostname
+    ignore_errors: yes
+
+
   - name: Gathering Facts
     setup:
 
   tasks:
 
   - name: Instalando atualizacoes SO - Centos
-    yum: name=* state=latest update_cache=yes
+    yum: name=* state=latest update_cache=yes 
     when: (ansible_distribution == "CentOS") or
            ansible_distribution == "Red Hat Enterprise Linux" or
            ansible_distribution == "OracleLinux"
@@ -88,14 +108,15 @@
           (ansible_distribution == 'OracleLinux')
     action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
     with_items:
-     - libselinux-python
+#     - libselinux-python
      - net-tools
      - vim-common
-     - ntp
+     - ntpstat
      - openssl-devel
      - perl-IO-Socket-SSL
      - yum-utils
      - bind-utils
+     - perl-CPAN
     tags: instalar
 
   - name: Instalando pacotes do Debian
@@ -108,13 +129,21 @@
      - net-tools
     tags: instalar
 
+
+  - name: Instando pacotes CentOS ou RedHat menores que 7
+    when: ((ansible_os_family == "RedHat" or ansible_distribution == 'CentOS')  and (ansible_distribution_major_version > 8 or ansible_distribution_version > 8))
+    action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
+    with_items:
+     - rcs 
+     - libselinux-python
+    tags: instalar
+
   - name: Instalado Pacotes
     action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
     with_items:
      - mlocate
      - sudo
      - wget
-     - rcs
      - curl
      - sysstat
      - wget
