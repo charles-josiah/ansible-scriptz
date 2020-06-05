@@ -158,7 +158,7 @@
 
 
   - name: Instalando zabbix-agent 
-    action: raw yum install zabbix-agent 
+    action: raw yum -y install zabbix-agent 
     when: (ansible_os_family == "Centos") or (ansible_os_family == "RedHat")
     tags: instalar
 
