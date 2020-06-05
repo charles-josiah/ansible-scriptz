@@ -31,3 +31,5 @@ desliga.yaml - script para desligamento de uma ambiente inteiro.
 suporte.yaml - script para suporte, adição/remoção de usuarios, chaves publicas para SSH, troca de senhas dos usuarios e ajustes no sudoers.
 
 zabbix.yaml - script em desenvolvimento para configuração do client zabbix.
+
+zbx.yaml - Script para nstalação zabbix-agent no debian/centos, configuração do zabbix-agent e adição do host na zabbix-server
