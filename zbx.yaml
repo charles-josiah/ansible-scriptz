@@ -42,7 +42,7 @@
     zbx_passwd: "xxxxxxxxxxxx"              #senha do usuario com permissao para add hosts
     zbx_url: "http://xxxxx/zabbix"          #url do zabbix
 
-  tasks:
+   tasks:
 
   - name: install Python e agent zabbix
     apt:
@@ -52,11 +52,25 @@
     when: (ansible_os_family == "Debian") or (ansible_os_family == "Ubuntu")
     tags: instalar 
 
+  - name: Desliga SELinux
+    selinux:
+      policy: targeted
+      state: permissive
+    when: ansible_distribution == "CentOS"  or (ansible_os_family == "RedHat")
+
   - name: Removendo Zabbix-Agent
     apt: 
       name: zabbix-agent
       state: absent 
     when: (ansible_os_family == "Debian") or (ansible_os_family == "Ubuntu")
+    ignore_errors: yes
+    tags: instalar 
+
+  - name: Removendo Zabbix-Agent
+    yum: 
+      name: zabbix-agent
+      state: absent 
+    when: (ansible_os_family == "Centos") or (ansible_os_family == "RedHat")
     ignore_errors: yes
     tags: instalar 
    
@@ -68,6 +82,11 @@
   - name: Registro da versao do sistema operacional
     shell: lsb_release -sc
     register: SOVERSION
+    tags: [instalar, conf, add] 
+
+  - name: Registro da versao short do sistema operacional
+    shell: lsb_release  -sr |  cut -c1-1
+    register: SOSHOT
     tags: [instalar, conf, add] 
 
   - name: Registro do nome da maquina 
@@ -94,6 +113,7 @@
     with_items:
         - SO.stdout
         - SOVERSION.stdout
+        - SOSHOT.stdout
         - hname.stdout
         - hip.stdout
         - ipck.stdout
@@ -123,6 +143,25 @@
       state: present 
     when: (ansible_os_family == "Debian") or (ansible_os_family == "Ubuntu")
     tags: instalar 
+
+
+  - name: Baixando biblioteca Zabbix-Agent
+    action: raw wget https://repo.zabbix.com/zabbix/{{ zbx_ver }}/rhel/{{ SOSHOT.stdout }}/x86_64/zabbix-release-{{ zbx_ver }}{{ zbx_sub_ver }}{{ SOSHOT.stdout }}.noarch.rpm
+    when: (ansible_os_family == "Centos") or (ansible_os_family == "RedHat")
+    tags: instalar
+
+
+  - name: Executando novos repositorios .rpm
+    action: raw rpm -Uvh zabbix-release-{{ zbx_ver }}{{ zbx_sub_ver }}{{ SOSHOT.stdout }}.noarch.rpm 
+    when: (ansible_os_family == "Centos") or (ansible_os_family == "RedHat")
+    tags: instalar
+
+
+  - name: Instalando zabbix-agent 
+    action: raw yum install zabbix-agent 
+    when: (ansible_os_family == "Centos") or (ansible_os_family == "RedHat")
+    tags: instalar
+
 
   - name: Copiando arquivo de configuracao do zabbix-agent
     copy:
