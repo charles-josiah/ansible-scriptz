@@ -144,6 +144,7 @@
     tags: conf
 
   - name: Colocando a maquina no monitoramento
+    become: false
     local_action:
       module: zabbix_host
       server_url: "{{ zbx_url }}"
