@@ -1,0 +1,172 @@
+#####
+# Instalação zabbix-agent no debian, configuração do zabbix-agent e adição do host na zabbix
+# Em atualização ...
+# 
+#
+# Obs: necessita arquivo zabbix-agent.conf para copia para o cliente, exemplo:
+#
+# cat zabbix_agentd.conf 
+#  PidFile=/var/run/zabbix/zabbix_agentd.pid
+#  LogFile=/var/log/zabbix/zabbix_agentd.log
+#  LogFileSize=0
+#  DebugLevel=3
+#  Server=xxxxxxxxxxxx 
+#  ServerActive=XXXXXXXXXX1
+#  Hostname=zabbix
+#  ListenIP=0.0.0.0
+#
+# Include=/etc/zabbix/zabbix_agentd.d/*.conf
+# --------------------
+#
+#
+
+---
+
+- hosts: all
+  user: charles.a
+  connection: ssh
+  become_user: root
+  become: false
+  become_method: sudo
+  gather_facts: true
+
+  vars:
+    zbx_ver: "4.2"                          #versao zabbix
+    zbx_sub_ver: "-3"                       #subversao do zabbix-agent 
+    zbx_Server: "172.16.0.13"               #servidor do zabbix
+    zbx_ServerActive: "172.16.0.13"         #servidor do zabbix
+    zbx_confDir: "/etc/zabbix/"             #diretorio de configuração destino
+    zbx_confArq: "zabbix_agentd.conf"       #arquivo de configuração
+    work_dir: "./"                          #arquivo local
+    zbx_admin: "xxxxx"                      #usuario com permissão para add hosts no zabbix 
+    zbx_passwd: "xxxxxxxxxxxx"              #senha do usuario com permissao para add hosts
+    zbx_url: "http://xxxxx/zabbix"          #url do zabbix
+
+  tasks:
+
+  - name: install Python e agent zabbix
+    apt:
+      name: ['python', 'python-pip']
+      update_cache: yes
+      state: present
+    when: (ansible_os_family == "Debian") or (ansible_os_family == "Ubuntu")
+    tags: instalar 
+
+  - name: Removendo Zabbix-Agent
+    apt: 
+      name: zabbix-agent
+      state: absent 
+    when: (ansible_os_family == "Debian") or (ansible_os_family == "Ubuntu")
+    ignore_errors: yes
+    tags: instalar 
+   
+  - name: Registro de sistema operacional
+    shell: lsb_release -si | tr 'A-Z' 'a-z'
+    register: SO
+    tags: [instalar, conf, add] 
+
+  - name: Registro da versao do sistema operacional
+    shell: lsb_release -sc
+    register: SOVERSION
+    tags: [instalar, conf, add] 
+
+  - name: Registro do nome da maquina 
+    shell: hostname
+    register: hname
+    tags: [instalar, conf, add] 
+
+  - name: Registro de IP
+    shell: hostname -I | awk '{print $1}'
+    register: hip
+    tags: [instalar, conf, add] 
+
+  - name: Registro de pacote instalado
+    shell: dpkg -l | grep zabbix-agent; echo $?
+    register: ipack
+    tags: instalar
+
+  - name: Removendo bibliotecas Zabbix-Agent
+    action: raw dpkg --purge zabbix-release && dpkg --purge zabbix-agent
+    when: ipack.stdout != "1"
+    tags: instalar 
+
+  - debug: var={{ item }}
+    with_items:
+        - SO.stdout
+        - SOVERSION.stdout
+        - hname.stdout
+        - hip.stdout
+        - ipck.stdout
+        - zbx_ver
+        - zbx_sub_ver
+    tags: [instalar, confi, add] 
+
+
+  - name: Baixando biblioteca Zabbix-Agent 
+    action: raw wget https://repo.zabbix.com/zabbix/{{ zbx_ver }}/{{ SO.stdout }}/pool/main/z/zabbix-release/zabbix-release_{{ zbx_ver }}{{ zbx_sub_ver }}+{{ SOVERSION.stdout }}_all.deb
+    when: (ansible_os_family == "Debian") or (ansible_os_family == "Ubuntu")
+    tags: instalar 
+
+  - name: Executando novos repositorios .deb
+    action: raw dpkg -i zabbix-release_{{ zbx_ver }}{{ zbx_sub_ver }}+{{ SOVERSION.stdout }}_all.deb
+    when: (ansible_os_family == "Debian") or (ansible_os_family == "Ubuntu")
+    tags: instalar 
+
+  - name: Atualizando repositorios
+    action: raw apt-get update
+    when: (ansible_os_family == "Debian") or (ansible_os_family == "Ubuntu")
+    tags: instalar 
+
+  - name: Install agent-zabbix
+    apt:
+      name: zabbix-agent
+      state: present 
+    when: (ansible_os_family == "Debian") or (ansible_os_family == "Ubuntu")
+    tags: instalar 
+
+  - name: Copiando arquivo de configuracao do zabbix-agent
+    copy:
+      src: "{{ work_dir }}{{ zbx_confArq }}"
+      dest: "{{ zbx_confDir }}{{ zbx_confArq }}" 
+      backup: yes
+    tags: conf 
+
+  - name: Modifca algumas linhas do zabbix 
+    lineinfile:
+      backup=yes
+      dest="{{ zbx_confDir }}{{ zbx_confArq }}"
+      regexp="{{ item.regexp }}"
+      line="{{ item.line }}"
+    with_items:
+        - { regexp: '(?i)^Hostname=', line: 'hostame={{ hname.stdout }} ' }
+        - { regexp: '(?i)^Server=', line: 'Server={{ zbx_Server }} ' }
+        - { regexp: '(?i)^ServerActive=', line: 'ServerActive={{ zbx_ServerActive }} ' }
+    tags: conf
+
+  - name: Colocando a maquina no monitoramento
+    local_action:
+      module: zabbix_host
+      server_url: "{{ zbx_url }}"
+      login_user: "{{ zbx_admin }}"
+      login_password: "{{ zbx_passwd }}"
+      validate_certs: no
+      host_name: "{{ hname.stdout }}"
+      visible_name: "{{ hname.stdout }}"
+      description: Instalacao e configuracao via ansible
+      host_groups:
+        - Linux servers
+        - MTMON
+      link_templates:
+        - Template OS Linux
+      status: enabled
+      interfaces:
+        - type: 1
+          main: 1
+          useip: 1
+          ip: "{{ hip.stdout }}"
+          dns: ""
+          port: 10050
+      inventory_mode: manual
+      inventory_zabbix: 
+        os: "{{ SO.stdout }} {{ SOVERSION.stdout }}"
+    tags: add 
