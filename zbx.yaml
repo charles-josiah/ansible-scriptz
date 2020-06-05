@@ -33,8 +33,8 @@
   vars:
     zbx_ver: "4.2"                          #versao zabbix
     zbx_sub_ver: "-3"                       #subversao do zabbix-agent 
-    zbx_Server: "172.16.0.13"               #servidor do zabbix
-    zbx_ServerActive: "172.16.0.13"         #servidor do zabbix
+    zbx_Server: "x.x.x.x"               #servidor do zabbix
+    zbx_ServerActive: "y.y.y.y"         #servidor do zabbix
     zbx_confDir: "/etc/zabbix/"             #diretorio de configuração destino
     zbx_confArq: "zabbix_agentd.conf"       #arquivo de configuração
     work_dir: "./"                          #arquivo local
