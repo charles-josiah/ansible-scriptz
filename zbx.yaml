@@ -1,7 +1,6 @@
 #####
-# Instalação zabbix-agent no debian, configuração do zabbix-agent e adição do host na zabbix
-# Em atualização ...
-# 
+# Instalação zabbix-agent no debian/centos, configuração do zabbix-agent e adição do host na zabbix
+# Necessário ajustar as variaveis abaixo.
 #
 # Obs: necessita arquivo zabbix-agent.conf para copia para o cliente, exemplo:
 #
@@ -18,6 +17,10 @@
 # Include=/etc/zabbix/zabbix_agentd.d/*.conf
 # --------------------
 #
+#
+# Desenvolviedo por charles(a)gmail.com
+# Primeiro desenvolvimento, não tem data certa.
+# Atualizado: 05/06/2020 - suporte a centos e ajustes urls
 #
 
 ---
@@ -42,7 +45,7 @@
     zbx_passwd: "xxxxxxxxxxxx"              #senha do usuario com permissao para add hosts
     zbx_url: "http://xxxxx/zabbix"          #url do zabbix
 
-   tasks:
+ tasks:
 
   - name: install Python e agent zabbix
     apt:
@@ -99,13 +102,25 @@
     register: hip
     tags: [instalar, conf, add] 
 
-  - name: Registro de pacote instalado
+  - name: Registro de pacote debian  instalado
     shell: dpkg -l | grep zabbix-agent; echo $?
     register: ipack
+    when: (ansible_os_family == "Debian") or (ansible_os_family == "Ubuntu")
     tags: instalar
 
-  - name: Removendo bibliotecas Zabbix-Agent
+  - name: Registro de pacote centos instalado
+    shell: rpm -qa | grep zabbix;  echo $?
+    register: ipack
+    when: (ansible_os_family == "Centos") or (ansible_os_family == "RedHat")
+    tags: instalar
+
+  - name: Removendo bibliotecas Zabbix-Agent .deb
     action: raw dpkg --purge zabbix-release && dpkg --purge zabbix-agent
+    when: ipack.stdout != "1"
+    tags: instalar 
+
+  - name: Removendo bibliotecas Zabbix-Agent .rpm
+    action: raw rpm -e zabbix* 
     when: ipack.stdout != "1"
     tags: instalar 
 
@@ -177,7 +192,7 @@
       regexp="{{ item.regexp }}"
       line="{{ item.line }}"
     with_items:
-        - { regexp: '(?i)^Hostname=', line: 'hostame={{ hname.stdout }} ' }
+        - { regexp: '(?i)^Hostname=', line: 'Hostname={{ hname.stdout }} ' }
         - { regexp: '(?i)^Server=', line: 'Server={{ zbx_Server }} ' }
         - { regexp: '(?i)^ServerActive=', line: 'ServerActive={{ zbx_ServerActive }} ' }
     tags: conf
@@ -210,3 +225,11 @@
       inventory_zabbix: 
         os: "{{ SO.stdout }} {{ SOVERSION.stdout }}"
     tags: add 
+
+  - name: make sure the zabbix-agent service is running
+    service:
+      name: zabbix-agent 
+      state: started
+      enabled: True
+    become: True
+    tags: conf
