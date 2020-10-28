@@ -35,4 +35,4 @@ zabbix.yaml - script em desenvolvimento para configuração do client zabbix.
 zbx.yaml - Script para nstalação zabbix-agent no debian/centos, configuração do zabbix-agent e adição do host na zabbix-server
 
 fgt_add_cloud_user.yml - Ansible para adicionar usuario nos firewall Fortinet, usando a bilbiotecas ansible-galaxy-fortios-collection
-fgt_add_cloud_user.yml - New script to add user to Fortinet firewall, using ansible-galaxy-fortios-collection
+fgt_add_cloud_user.yml - Ansible to add user to Fortinet firewall, using ansible-galaxy-fortios-collection
