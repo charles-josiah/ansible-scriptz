@@ -1,0 +1,32 @@
+---
+- hosts: fortinet
+
+  collections:
+   - fortinet.fortios
+
+  connection: httpapi
+
+  vars:
+   vdom: "root"
+   ansible_httpapi_use_ssl: yes
+   ansible_httpapi_validate_certs: no
+   ansible_httpapi_port: 8443
+
+
+  tasks:
+  - name: Configure Forticloud Admin Users.
+    fortios_system_admin:
+      vdom:  "{{ vdom }}"
+      state: "present"
+      system_admin:
+        accprofile: "super_admin"
+        accprofile_override: "enable"
+        allow_remove_admin_session: "enable"
+        comments: "Usuario conexao forticloud"
+        force_password_change: "disable"
+        guest_auth: "disable"
+        name: "fgt_cloud_admin"
+        password: "<53nh@_M@lVcA>"
+        peer_auth: "disable"
+        two_factor: "disable"
+
