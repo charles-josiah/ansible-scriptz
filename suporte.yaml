@@ -1,6 +1,6 @@
 ---
-- hosts: all
-  user: charles.a
+- hosts: all 
+  user: charles.a 
   connection: ssh
   become_user: root 
   become: yes
@@ -12,7 +12,6 @@
 
   vars:
     desliga_servicos:
-      - postfix
       - firewalld
 
     banner: /etc/issue.net
@@ -27,9 +26,13 @@
   - set_fact:
         my_pass: "{{ pwd_alias }}"
 
-  - name: Desliga SELinux
-    selinux:  state=disabled
-    when: ansible_distribution == "CentOS"
+#  - name: Deixa permissivo o SELinux
+#    selinux:  state=permissive 
+#    when: (ansible_distribution == 'Red Hat Enterprise Linux') or
+#            (ansible_distribution == 'RedHat') or
+#            (ansible_distribution == 'CentOS') or
+#            (ansible_distribution == 'OracleLinux')
+
 
   - name: Desliga Servicos 
     service:

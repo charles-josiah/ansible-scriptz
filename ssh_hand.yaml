@@ -87,9 +87,10 @@
         - { regexp: '(?i)^.PermitRootLogin', line: 'PermitRootLogin no' }
         - { regexp: '(?i)^.AuthorizedKeysFile', line: 'AuthorizedKeysFile {{ chave_dir_dst }}/%u.pub ' }
         - { regexp: '(?i)^.X11Forwarding', line: 'X11Forwarding no' }
-        - { regexp: '(?i)^.MaxAuthTries', line: 'MaxAuthTries 4' }
+        - { regexp: '(?i)^.MaxAuthTries', line: 'MaxAuthTries 3' }
         - { regexp: '(?i)^.PermitUserEnvironment', line: 'PermitUserEnvironment no' }
         - { regexp: '(?i)^.Ciphers', line: 'Ciphers aes128-ctr,aes192-ctr,aes256-ctr' }
+        - { regexp: '(?i)^.AllowTcpForwarding', line: 'AllowTcpForwarding No' }
         - { regexp: '(?i)^.ClientAliveCountMax', line: 'ClientAliveCountMax 0' }
 
   - name: Permite grupo whell acesso e grpadminlinux ao sistema

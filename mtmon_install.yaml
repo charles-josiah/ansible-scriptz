@@ -5,11 +5,8 @@
 #   75  yum install "perl(HTTP::Response)" 
 #
 
-
-
-
 ---
-- hosts: all
+- hosts: veeam-rep 
   user: charles.a
   connection: ssh
   become_user: root
@@ -47,6 +44,7 @@
      - sharutils
      - perl-JSON
      - openssl-devel
+     - perl-LWP-Protocol-https
     tags: instalar
 
 
@@ -124,19 +122,28 @@
         - Time::HiRes
         - Net::HTTP
         - LWP::UserAgent
+#        - perl(ExtUtils::Embed)
+#        - perl(LWP::UserAgent) 
+#        - perl(LWP::UserAgent)
+#        - perl(HTTP::Response) 
     tags: instalar
 
+
+  - name: Testando os modulos 
+    shell: for modulo in CPAN CGI LWP Net::Ping Net::Telnet Mail::Sender; do perl -M$modulo -e "print qq(\$$modulo::VERSION\t$modulo\n);"; done
+
+
   - name: Baixando pacotes MTMON - inst_mtadm
-    get_url: url=http://mtfln.multitask.com.br/install/inst_mtadm
+    get_url: url=http://mtfln.multitask.com.br/install/inst_mtadm.new
            dest=/tmp/inst_mtadm
 
 
   - name: Baixando pacotes MTMON - inst_mtmon_client
-    get_url: url=http://mtfln.multitask.com.br/install/inst_mtmon_client
+    get_url: url=http://mtfln.multitask.com.br/install/inst_mtmon_client.new
            dest=/tmp/inst_mtmon_client
 
   - name: Baixando pacotes MTMON - inst_mtmon_send
-    get_url: url=http://mtfln.multitask.com.br/install/inst_mtsend
+    get_url: url=http://mtfln.multitask.com.br/install/inst_mtsend.new
            dest=/tmp/inst_mtsend
 
   - name: executa mtmon - inst_mtadm

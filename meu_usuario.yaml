@@ -1,10 +1,10 @@
 ---
 - hosts: all 
-  user: root
+  user: root 
   connection: ssh
   #become_user: root
   #become: yes
-  #become_method: sudo
+  #become_method: su
   #connection: paramiko
   gather_facts: true 
 

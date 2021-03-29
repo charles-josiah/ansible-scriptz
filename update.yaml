@@ -3,7 +3,7 @@
 
 ---
 
-- hosts: all
+- hosts: all 
   user: charles.a
   connection: ssh
   become_user: root
@@ -42,6 +42,10 @@
 
   - name: Instalando phyton ansible CentOS 8 e RHEL 8
     raw:  sudo dnf install python3 python3-pip -y
+    ignore_errors: yes
+
+  - name: Instalando EPEL modo raiz -  CentOS 8 e RHEL 8
+    raw:  sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y 
     ignore_errors: yes
 
   - name: Instalando phyton ansible CentOS 8 e RHEL 8
@@ -131,11 +135,12 @@
 
 
   - name: Instando pacotes CentOS ou RedHat menores que 7
-    when: ((ansible_os_family == "RedHat" or ansible_distribution == 'CentOS')  and (ansible_distribution_major_version > 8 or ansible_distribution_version > 8))
+    when: (ansible_os_family == "RedHat" or ansible_distribution == 'CentOS') 
     action: "{{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes"
     with_items:
      - rcs 
      - libselinux-python
+    ignore_errors: yes
     tags: instalar
 
   - name: Instalado Pacotes
