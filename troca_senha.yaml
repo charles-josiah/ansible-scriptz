@@ -1,0 +1,24 @@
+###########
+# Change user password, asking the password  in interactive mode
+ 
+---
+- hosts: all
+  user: charles.a
+  connection: ssh
+  become_user: root
+  become: yes
+  become_method: sudo
+  #connection: paramiko
+  gather_facts: yes
+
+  vars_prompt:
+  - name: user_name
+    prompt: Enter the user name for password reset
+    private: no
+  
+  - name: pass
+    prompt: Enter the password
+
+  tasks:
+  - name: Change {{ user_name }}  password
+    user: name={{ user_name }} password={{ pass|password_hash('sha512') }} update_password=always

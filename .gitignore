@@ -1,9 +1,0 @@
-ansible.cfg
-ajuste.sh
-.gitignore
-.DS_Store
-.bkp
-.retry
-.bak
-backup/
-testing/

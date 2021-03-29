@@ -1,0 +1,68 @@
+#######
+# Setup firewalld for a veeam/veam proxy backup system
+#
+
+---
+- hosts: all
+  user: charles.a 
+  connection: ssh
+  become_user: root
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+
+  ##### Mais variaveis no group_var/veeam-proxy
+
+  vars: 
+    zona: public
+
+  tasks:
+
+  - name: Inicia firewall
+    service:
+      name=firewalld
+      state=started 
+      enabled=yes
+    ignore_errors: yes
+
+  - name: Remove servicos adicionais 
+    firewalld:
+      zone="{{ zona }}"
+      service={{ item }}
+      permanent=yes
+      state=disabled
+    with_items: "{{ remove_serv }}"   
+
+  - name: Remove portas adicionais 
+    firewalld:
+      zone="{{ zona }}"
+      port={{ item }}
+      permanent=yes
+      state=disabled
+    with_items: "{{ remove_portas }}"   
+
+  - name: Add rules rich 
+    firewalld:
+      zone="{{ zona }}" 
+      rich_rule={{ item }}
+      permanent=yes
+      state=enabled 
+    with_items: "{{ add_regras }}"
+
+  - name: Remove rules rich 
+    firewalld:
+      zone="{{ zona }}" 
+      rich_rule={{ item }}
+      permanent=yes
+      state=disabled
+    with_items: "{{ remove_regras }}"
+
+
+  - name: Ativando os logs
+    shell: firewall-cmd --set-log-denied=unicast
+    notify:
+      - Reload Rulez
+
+  handlers:
+    - name: Reload Rulez
+      shell: firewall-cmd --reload

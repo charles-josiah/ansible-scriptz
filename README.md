@@ -26,8 +26,6 @@ uptime.yaml - script para mostrar o uptime do servidores.
 
 mtmon_install.yaml - script ansible para instalação e pre-configuracao do MTMON, software de gerencia de redes, servidores, servicos  da Multitask Consultoria.
 
-desliga.yaml - script para desligamento de uma ambiente inteiro.
-
 suporte.yaml - script para suporte, adição/remoção de usuarios, chaves publicas para SSH, troca de senhas dos usuarios e ajustes no sudoers.
 
 zabbix.yaml - script em desenvolvimento para configuração do client zabbix.
@@ -35,4 +33,14 @@ zabbix.yaml - script em desenvolvimento para configuração do client zabbix.
 zbx.yaml - Script para nstalação zabbix-agent no debian/centos, configuração do zabbix-agent e adição do host na zabbix-server
 
 fgt_add_cloud_user.yml - Ansible para adicionar usuario nos firewall Fortinet, usando a bilbiotecas ansible-galaxy-fortios-collection
-fgt_add_cloud_user.yml - Ansible to add user to Fortinet firewall, using ansible-galaxy-fortios-collection
+
+banner.yaml- Configura o banner de um servidor
+
+lvm.yaml - Configura e particiona os discos para formato LVM
+
+setup_fw_veeam.yaml - Configura o firewalld para o serviço do veeam
+
+troca_senha.yaml - Troca a senha de servidores, perguntando a nova senha de forma interativa.
+
+
+

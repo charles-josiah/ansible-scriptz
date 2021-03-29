@@ -1,0 +1,22 @@
+---
+- hosts: <host> 
+  name: 'Playbook to setup disks as LVM type'
+  
+  vars:
+    disco_novo:  #disks
+      - /dev/sdaf
+      - /dev/sdah
+      - /dev/sdaj
+      - /dev/sdal
+      - /dev/sdak
+      - /dev/sdai  
+
+  tasks:
+    - name: Particionando
+      parted:
+        label: gpt
+        number: 1
+        state: present
+        flags: [ lvm ]
+        device: "{{ item }}"
+      with_items: "{{ disco_novo }}"
