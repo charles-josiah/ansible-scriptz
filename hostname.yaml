@@ -1,0 +1,58 @@
+#Change hostname, ip address, ip default gw, dns nameservers and domain.
+
+---
+- hosts: all
+  name: 'Playbook para trocar o hostanme'
+  tasks:
+
+    - name: "Atualizando hostname"
+      hostname:
+        name: "{{ new_hostname }}"
+    - name: 'Adicionando o nome no  /etc/hosts'
+      lineinfile:
+        backup: yes
+        path: /etc/hosts
+        regexp: '^127\.0\.0\.1[ \t]+localhost'
+        line: '127.0.0.1 localhost {{ new_hostname }}'
+        state: present
+
+    - name: "Configurando resolv.conf"
+      lineinfile:
+        state=present
+        path={{ resolv_setup }} 
+        backup=yes
+        insertafter=EOF
+        line="{{ item }}"
+      with_items:       
+          - " NETCONFIG_DNS_STATIC_SEARCHLIST='{{ dominio }}'"
+          - " NETCONFIG_DNS_STATIC_SERVERS='{{ dns1 }} {{ dns2 }}'"
+
+    - name: "Rota default"
+      lineinfile:
+        state=present
+        path={{ routes }} 
+        backup=yes 
+        insertafter=EOF
+        line="default {{ default_gw }}  - - "
+
+
+    - name: "limpa configuracao eth0"
+      file: path="{{ eth0_file }}" state=absent 
+
+    - name: "Configura Rede eth0"
+      lineinfile:
+        create=yes
+        state=present
+        path={{ eth0_file  }}
+        backup=yes
+        line="{{ item }}"
+      with_items:       
+          - " BOOTPROTO='static' "
+          - " IPADDR='{{ ip_endereco }}' "
+          - " MTU='1500'"
+          - " NAME='' "
+          - " NETMASK='255.255.255.0' "
+          - " STARTMODE='auto' "
+          - " USERCONTROL='no' "
+
+

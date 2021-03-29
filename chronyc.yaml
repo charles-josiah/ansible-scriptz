@@ -1,0 +1,34 @@
+#setup chronyc
+---
+
+- hosts: all
+  user: root
+  connection: ssh
+  become_user: root
+  become: true
+  become_method: sudo
+  gather_facts: true
+  #connection: paramiko
+
+ #vars, on groups_var, need the 2 NTP Servers like AD Servers
+
+  tasks:
+  - name: Set timezone
+    raw:  timedatectl set-timezone America/Sao_Paulo
+
+  - name: "Limpa Configuracao"
+    file: path="{{ chronyc_config }}" state=absent 
+
+  - name: "Configura {{ chronyc_config }} para {{ dominio }} "
+    lineinfile:
+      create=yes
+      state=present
+      path={{  chronyc_config }}
+      backup=yes
+      line="{{ item }}"
+    with_items:      
+      - "server {{ dns1 }}  iburst"
+      - "server {{ dns2 }}  iburst"
+      - "driftfile /var/lib/chrony/drift"
+      - "makestep 3 10"
+      - "rtcsync "

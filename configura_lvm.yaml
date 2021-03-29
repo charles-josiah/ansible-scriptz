@@ -1,0 +1,61 @@
+#setup a LVM PV LV VG 
+---
+- hosts: all
+  
+  tasks:
+    - name: Particionando
+      parted:
+        label: gpt
+        number: 1
+        state: present
+        flags: [ lvm ]
+        device: "{{ item.disco }}"
+      with_items: "{{ discos }}"
+
+    - name: set fact
+      set_fact: foo_item="{{ item.particao }}"
+      with_items: "{{ discos }}"
+      register: foo_result
+
+    - name: Gerando lista de discos - Adaptacoes Nervosas
+      set_fact: foo="{{ foo_result.results | map(attribute='ansible_facts.foo_item') | list }}"
+
+    - name: Criando o VG
+      lvg: 
+        state: present
+        vg: "{{ vg_nome }}" 
+        pvs: "{{ foo }}"
+
+    - name: Criando LVs
+      lvol: 
+         vg: "{{ vg_nome }}"
+         lv: "{{ item.lv_nome }}"
+         size: "{{ item.lv_tamanho }}"
+         active: yes
+         state: present 
+      with_items: "{{ lv_suse }}"
+
+    - name: Criando os file system "{{ fs }}" 
+      filesystem:
+        fstype: "{{ fs }}"
+        dev: "/dev/mapper/{{ vg_nome }}-{{ item.lv_nome}}"
+        force: no 
+      with_items: "{{ lv_suse }}"
+
+    - name: Criando os direstorios de destino 
+      file:
+        path: "{{  item.dir_mnt }}"
+        state: directory
+        mode: '0755'
+      with_items: "{{ lv_suse }}"
+
+    - name: Configurando o fstab 
+      lineinfile:
+        state=present
+        path={{ fstab }} 
+        backup=yes 
+        insertafter=EOF
+        line="/dev/mapper/{{ vg_nome }}-{{ item.lv_nome}}  {{ item.dir_mnt }}  xfs    defaults                      0  0  "
+      with_items: "{{ lv_suse }}"
+
+
