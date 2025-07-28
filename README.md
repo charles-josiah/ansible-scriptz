@@ -2,6 +2,8 @@
 
 Repositorio com scripts ansible legais e uteis do nosso dia a dia.
 
+ansible_dns_access_playbooks.md - script para validar e trocar o endereço dos dns do resolv.conf
+ 
 ver_hora.yaml - script ansible para mostrar hostname, data, hora, timezone muito util para virada de horarios
 
 update_e_install_pkg.yaml - script ansible para config inicial de um servidor, setando os pacotes iniciais.
