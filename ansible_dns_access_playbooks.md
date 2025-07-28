@@ -64,7 +64,7 @@ Cria um backup datado do arquivo de DNS e aplica nova configuração com os serv
 **Arquivo:** `change_dns.yml`
 
 ```yaml
-- name: Alterar DNS para 10.3.66.72 e 10.3.66.73
+- name: Alterar DNS para 10.3.6.2 e 10.3.6.3
   hosts: all
   become: yes
   gather_facts: no
@@ -81,8 +81,8 @@ Cria um backup datado do arquivo de DNS e aplica nova configuração com os serv
       copy:
         dest: /etc/resolv.conf
         content: |
-          nameserver 10.3.66.72
-          nameserver 10.3.66.73
+          nameserver 10.3.6.2
+          nameserver 10.3.6.3
 ```
 
 ---
